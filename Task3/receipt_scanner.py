@@ -1,7 +1,3 @@
-# receipt_scanner_enhanced.py
-"""
-Enhanced receipt scanner with better total amount detection
-"""
 import cv2
 import numpy as np
 from PIL import Image
@@ -31,7 +27,7 @@ class ReceiptScanner:
                 print(f"✓ Tesseract found at: {path}")
                 return
         
-        print("⚠️ Tesseract not found. Using demo mode.")
+        print("Tesseract not found. Using demo mode.")
 
     def preprocess_image(self, image):
         """Enhanced image preprocessing for better OCR results"""
@@ -43,20 +39,16 @@ class ReceiptScanner:
             else:
                 img_array = image
             
-            # Convert to grayscale
             if len(img_array.shape) == 3:
                 gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
             else:
                 gray = img_array
             
-            # Apply adaptive thresholding for better text contrast
             thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                           cv2.THRESH_BINARY, 11, 2)
             
-            # Denoise
             denoised = cv2.medianBlur(thresh, 3)
             
-            # Apply dilation to make text more visible
             kernel = np.ones((1, 1), np.uint8)
             dilated = cv2.dilate(denoised, kernel, iterations=1)
             
@@ -71,7 +63,6 @@ class ReceiptScanner:
         try:
             processed_img = self.preprocess_image(image)
             
-            # Try different PSM modes for better results
             configs = [
                 r'--oem 3 --psm 6',  # Assume uniform block of text
                 r'--oem 3 --psm 4',  # Assume single column of text of variable sizes
@@ -124,15 +115,11 @@ Thank you!"""
             """Clean a number string from OCR artifacts."""
             if not s:
                 return ""
-            # Remove spaces within numbers
             s = re.sub(r'(\d)\s+(\d)', r'\1\2', s)
-            s = re.sub(r'(\d)\s+(\d)', r'\1\2', s)  # Apply twice for multiple spaces
-            # Remove currency symbols for parsing
+            s = re.sub(r'(\d)\s+(\d)', r'\1\2', s)
             s = re.sub(r'[\$£€₹¥]', '', s)
             s = re.sub(r'\bRM\b', '', s, flags=re.IGNORECASE)
-            # Replace comma as thousands separator
             s = s.replace(',', '')
-            # Remove any remaining non-numeric except decimal point
             s = re.sub(r'[^\d.]', '', s)
             return s.strip()
 
@@ -142,28 +129,22 @@ Thank you!"""
                 cleaned = clean_number_string(s)
                 if not cleaned or cleaned == '.':
                     return None
-                # Handle multiple decimal points (take first valid number)
                 parts = cleaned.split('.')
                 if len(parts) > 2:
                     cleaned = parts[0] + '.' + parts[1]
                 val = float(cleaned)
-                # Sanity check - receipts rarely have totals > 100000
                 if val > 100000:
                     return None
                 return val
             except Exception:
                 return None
 
-        # Join all lines for pattern matching, but also keep line-by-line
         full_text = text
         lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
         if not lines:
             return None
 
-        # === STRATEGY 1: Direct regex patterns on full text ===
-        # These patterns look for "Total" followed by an amount
         direct_patterns = [
-            # Total (RM) : 436.20 or Total {RM) : 436.20
             r'[Tt]otal\s*[\(\{]?\s*RM\s*[\)\}]?\s*[:\s]+(\d+[,.\s]*\d*)',
             # Total: 436.20 or TOTAL: 436.20
             r'[Tt][Oo][Tt][Aa][Ll]\s*[:\s]+[\$£€]?\s*(\d+[,.\s]*\d*)',
@@ -183,13 +164,11 @@ Thank you!"""
         for pattern in direct_patterns:
             matches = re.findall(pattern, full_text, re.IGNORECASE)
             if matches:
-                # Take the last match (usually the final total)
                 for match in reversed(matches):
                     amt = parse_amt(match)
                     if amt is not None and 0.01 <= amt <= 50000:
                         return amt
 
-        # === STRATEGY 2: Line-by-line analysis ===
         total_keywords = [
             'grand total', 'final total', 'total amount', 'amount payable',
             'amount due', 'balance due', 'net total', 'total due',
@@ -212,7 +191,7 @@ Thank you!"""
 
         def extract_amount_from_line(line):
             """Extract the most likely amount from a line."""
-            # Patterns to find amounts
+            
             patterns = [
                 r'[\$£€]\s*([\d,.\s]+)',           # Currency symbol + amount
                 r'\bRM\s*([\d,.\s]+)',              # Malaysian Ringgit
@@ -450,4 +429,5 @@ Final Total: $108.54"""
         print(f"Date: {data.get('date')}")
 
 if __name__ == "__main__":
+
     test_enhanced_scanner()
