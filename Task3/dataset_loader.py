@@ -1,8 +1,3 @@
-# dataset_loader.py
-"""
-Script to load and preprocess SROIE dataset for receipt scanning system.
-Dataset structure: Hackathon data/SROIE2019/
-"""
 import os
 import json
 import pandas as pd
@@ -60,17 +55,14 @@ class SROIEDatasetLoader:
         
         image_annotation_pairs = []
         
-        # Look for images in the split directory
         for ext in ["*.jpg", "*.png", "*.jpeg"]:
             for img_path in split_path.rglob(ext):
-                # Try to find corresponding annotation file
                 base_name = img_path.stem
                 
-                # Check for annotation in various possible locations
                 possible_annotation_locations = [
-                    img_path.parent / f"{base_name}.txt",  # Same directory
-                    split_path / "box" / f"{base_name}.txt",  # box directory
-                    split_path / "entities" / f"{base_name}.txt",  # entities directory
+                    img_path.parent / f"{base_name}.txt",  
+                    split_path / "box" / f"{base_name}.txt",
+                    split_path / "entities" / f"{base_name}.txt",
                 ]
                 
                 annotation_path = None
@@ -108,20 +100,18 @@ class SROIEDatasetLoader:
             parts = line.split(',')
             
             if len(parts) >= 9:
-                # Format with coordinates: x1,y1,x2,y2,x3,y3,x4,y4,text
                 try:
                     coords = list(map(int, parts[:8]))
-                    text = ','.join(parts[8:])  # Join remaining parts as text (might contain commas)
+                    text = ','.join(parts[8:])  
                     
-                    # Convert quadrilateral to bounding box (min/max of coordinates)
-                    x_coords = coords[0::2]  # x1, x2, x3, x4
-                    y_coords = coords[1::2]  # y1, y2, y3, y4
+                    x_coords = coords[0::2]  
+                    y_coords = coords[1::2]  
                     
                     bbox = [
-                        min(x_coords),  # x_min
-                        min(y_coords),  # y_min
-                        max(x_coords),  # x_max
-                        max(y_coords)   # y_max
+                        min(x_coords),  
+                        min(y_coords),  
+                        max(x_coords),  
+                        max(y_coords)   
                     ]
                     
                     annotations.append({
@@ -130,10 +120,8 @@ class SROIEDatasetLoader:
                         'quadrilateral': coords
                     })
                 except ValueError:
-                    # If parsing coordinates fails, treat as text only
                     annotations.append({'text': line, 'bbox': None, 'quadrilateral': None})
             else:
-                # Text-only format
                 annotations.append({'text': line, 'bbox': None, 'quadrilateral': None})
         
         return annotations
@@ -160,14 +148,10 @@ class SROIEDatasetLoader:
         
         for img_path, ann_path in image_annotation_pairs:
             try:
-                # Load image
                 image = Image.open(img_path)
-                image = image.convert('RGB')  # Ensure RGB format
-                
-                # Load annotations
+                image = image.convert('RGB')  
                 annotations = self.parse_sroie_annotation(ann_path)
                 
-                # Extract all text from annotations
                 all_text = ' '.join([ann['text'] for ann in annotations if ann['text']])
                 
                 dataset.append({
@@ -176,7 +160,7 @@ class SROIEDatasetLoader:
                     'image': image,
                     'annotations': annotations,
                     'full_text': all_text,
-                    'image_size': image.size  # (width, height)
+                    'image_size': image.size  
                 })
                 
             except Exception as e:
@@ -203,7 +187,6 @@ class SROIEDatasetLoader:
         
         df = pd.DataFrame(records)
         
-        # Add text statistics
         if not df.empty:
             df['text_length'] = df['text'].apply(len)
             df['word_count'] = df['text'].apply(lambda x: len(str(x).split()))
@@ -218,12 +201,10 @@ class SROIEDatasetLoader:
         if len(dataset) == 0:
             return
         
-        # Count annotations
         total_annotations = sum(len(item['annotations']) for item in dataset)
         print(f"Total annotations: {total_annotations}")
         print(f"Average annotations per image: {total_annotations / len(dataset):.2f}")
         
-        # Text statistics
         all_texts = []
         for item in dataset:
             for ann in item['annotations']:
@@ -234,12 +215,10 @@ class SROIEDatasetLoader:
             avg_text_length = np.mean([len(text) for text in all_texts])
             print(f"Average text length: {avg_text_length:.2f} characters")
             
-            # Show sample texts
             print("\nSample texts from dataset:")
             for i, text in enumerate(all_texts[:5]):
                 print(f"  {i+1}. {text[:100]}{'...' if len(text) > 100 else ''}")
         
-        # Image statistics
         widths = [item['image_size'][0] for item in dataset]
         heights = [item['image_size'][1] for item in dataset]
         
@@ -262,25 +241,19 @@ class SROIEDatasetLoader:
         
         for i, item in enumerate(dataset):
             try:
-                # Convert PIL Image to OpenCV format
                 img_cv = cv2.cvtColor(np.array(item['image']), cv2.COLOR_RGB2BGR)
                 
-                # Convert to grayscale
                 gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
                 
-                # Apply adaptive thresholding
                 thresh = cv2.adaptiveThreshold(gray, 255, 
                                               cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                               cv2.THRESH_BINARY, 11, 2)
                 
-                # Denoise
                 denoised = cv2.medianBlur(thresh, 3)
                 
-                # Save preprocessed image
                 output_path_img = output_path / f"preprocessed_{i:04d}.png"
                 cv2.imwrite(str(output_path_img), denoised)
                 
-                # Update dataset with preprocessed image path
                 item['preprocessed_path'] = str(output_path_img)
                 
             except Exception as e:
@@ -327,22 +300,19 @@ class SROIEDatasetLoader:
         
         for i, item in enumerate(dataset):
             try:
-                # Save image
                 img_filename = f"receipt_{i:04d}.jpg"
                 img_save_path = images_dir / img_filename
                 item['image'].save(img_save_path)
                 
-                # Save annotation
                 ann_filename = f"receipt_{i:04d}.txt"
                 ann_save_path = annotations_dir / ann_filename
                 
                 with open(ann_save_path, 'w', encoding='utf-8') as f:
-                    # Write all text from annotations
+                    
                     for ann in item['annotations']:
                         if ann['text']:
                             f.write(ann['text'] + '\n')
                 
-                # Create simplified annotation (for OCR training)
                 simple_ann_path = annotations_dir / f"receipt_{i:04d}_simple.txt"
                 with open(simple_ann_path, 'w', encoding='utf-8') as f:
                     f.write(item['full_text'])
@@ -354,34 +324,25 @@ class SROIEDatasetLoader:
         print(f"Images saved to: {images_dir}")
         print(f"Annotations saved to: {annotations_dir}")
 
-# Main execution function
 def main():
     """Main function to load and process SROIE dataset"""
     
-    # Initialize dataset loader
     loader = SROIEDatasetLoader("Hackathon data/SROIE2019")
     
-    # Show dataset info
     loader.load_dataset_info()
     
-    # Load training dataset
     print("\n" + "="*50)
-    train_dataset = loader.load_sroie_dataset(split="train", max_samples=50)  # Load first 50 for testing
+    train_dataset = loader.load_sroie_dataset(split="train", max_samples=50)
     loader.analyze_dataset(train_dataset)
     
-    # Create DataFrame and save to CSV
     df = loader.save_to_csv(train_dataset, "sroie_train_data.csv")
     
-    # Prepare for training
     loader.prepare_for_training(train_dataset, "training_data")
     
-    # Preprocess images (optional)
     if input("\nPreprocess images? (y/n): ").lower() == 'y':
         loader.preprocess_images(train_dataset, "preprocessed_images")
-    
-    # Load test dataset
     print("\n" + "="*50)
-    test_dataset = loader.load_sroie_dataset(split="test", max_samples=10)  # Load first 10 for testing
+    test_dataset = loader.load_sroie_dataset(split="test", max_samples=10)  
     loader.analyze_dataset(test_dataset)
     
     if test_dataset:
@@ -390,13 +351,11 @@ def main():
     print("\n" + "="*50)
     print("Dataset loading completed!")
     
-    # Return datasets for further use
     return train_dataset, test_dataset
 
 if __name__ == "__main__":
     train_data, test_data = main()
     
-    # Example of how to use the loaded data
     if train_data:
         print(f"\nLoaded {len(train_data)} training samples")
         print(f"First sample keys: {train_data[0].keys()}")
