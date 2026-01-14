@@ -1,11 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <title>Air Pollution Checker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 8px;
+      text-align: center;
+    }
+    .result {
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    
+
+<div class="container">
+  <h2>Air Pollution Checker</h2>
+  <button onclick="getLocation()">Use my location</button>
+
+  <div style="margin-top:12px; display:flex; gap:8px;">
+    <input id="latInput" placeholder="Latitude" style="flex:1; padding:8px;" />
+    <input id="lonInput" placeholder="Longitude" style="flex:1; padding:8px;" />
+    <button onclick="fetchByCoords()" style="width:160px;">Fetch by coordinates</button>
+  </div>
+
+  <div class="result" id="aqiResult"></div>
+
+  <table id="pollutionTable" style="display:none;">
+    <tr>
+      <th>Pollutant</th>
+      <th>Concentration (µg/m³)</th>
+    </tr>
+    <tr><td>SO₂</td><td id="so2"></td></tr>
+    <tr><td>NO₂</td><td id="no2"></td></tr>
+    <tr><td>PM₁₀</td><td id="pm10"></td></tr>
+    <tr><td>PM₂.₅</td><td id="pm25"></td></tr>
+    <tr><td>O₃</td><td id="o3"></td></tr>
+    <tr><td>CO</td><td id="co"></td></tr>
+  </table>
+</div>
+
+<script>
+const API_KEY = "d06ed01c3d76186d6f2d8ff027354ee4";
+
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition, showError);
+  } else {
+    document.getElementById("aqiResult").innerText = "Geolocation not supported by your browser.";
+  }
+}
+
+function showPosition(position) {
+  const lat = position.coords.latitude;
+  const lon = position.coords.longitude;
+
+  fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`)
+    .then(response => {
+      if (!response.ok) {
+        return response.text().then(text => { throw new Error(response.status + ' ' + (text || response.statusText)); });
+      }
+      return response.json();
+    })
+    .then(data => displayData(data))
+    .catch(error => {
+      const msg = error.message || String(error);
+      if (msg.startsWith('401')) {
+        document.getElementById("aqiResult").innerText = `Unauthorized: ${msg}`;
+      } else {
+        document.getElementById("aqiResult").innerText = `Error: ${msg}`;
+      }
+      document.getElementById("pollutionTable").style.display = "none";
+      console.error('Air pollution API error:', error);
+    });
+}
+
+  function fetchByCoords() {
+    const latVal = document.getElementById('latInput').value.trim();
+    const lonVal = document.getElementById('lonInput').value.trim();
+
+    if (!latVal || !lonVal) {
+      document.getElementById('aqiResult').innerText = 'Please enter both latitude and longitude.';
+      return;
+    }
+
+    const lat = Number(latVal);
+    const lon = Number(lonVal);
+
+    if (!isFinite(lat) || !isFinite(lon)) {
+      document.getElementById('aqiResult').innerText = 'Latitude and longitude must be numbers.';
+      return;
+    }
+
+    fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`)
+      .then(response => {
+        if (!response.ok) {
+          return response.text().then(text => { throw new Error(response.status + ' ' + (text || response.statusText)); });
+        }
+        return response.json();
+      })
+      .then(data => displayData(data))
+      .catch(error => {
+        const msg = error.message || String(error);
+        if (msg.startsWith('401')) {
+          document.getElementById('aqiResult').innerText = `Unauthorized: ${msg}`;
+        } else {
+          document.getElementById('aqiResult').innerText = `Error: ${msg}`;
+        }
+        document.getElementById('pollutionTable').style.display = 'none';
+        console.error('Air pollution API error:', error);
+      });
+  }
+
+function displayData(data) {
+  if (!data || !data.list || !data.list[0]) {
+    document.getElementById("aqiResult").innerText = "No data available for this location.";
+    document.getElementById("pollutionTable").style.display = "none";
+    return;
+  }
+
+  const aqi = data.list[0].main.aqi;
+  const components = data.list[0].components;
+
+  document.getElementById("pollutionTable").style.display = "table";
+
+  document.getElementById("so2").innerText = components.so2;
+  document.getElementById("no2").innerText = components.no2;
+  document.getElementById("pm10").innerText = components.pm10;
+  document.getElementById("pm25").innerText = components.pm2_5;
+  document.getElementById("o3").innerText = components.o3;
+  document.getElementById("co").innerText = components.co;
+
+  let quality = "Unknown";
+  switch (aqi) {
+    case 1: quality = "Good"; break;
+    case 2: quality = "Fair"; break;
+    case 3: quality = "Moderate"; break;
+    case 4: quality = "Poor"; break;
+    case 5: quality = "Very Poor"; break;
+    default: quality = "Unknown"; break;
+  }
+
+  document.getElementById("aqiResult").innerText = `Air Quality Index: ${aqi} (${quality})`;
+}
+
+function showError(error) {
+  document.getElementById("aqiResult").innerText = "Location access denied or unavailable.";
+  document.getElementById("pollutionTable").style.display = "none";
+}
+</script>
+
 </body>
 </html>
