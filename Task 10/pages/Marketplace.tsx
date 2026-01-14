@@ -1,21 +1,25 @@
 
 import React, { useState } from 'react';
-import { Item } from '../types';
+import { Item, User } from '../types';
 import { ItemCard } from '../components/ItemCard';
 import { Search, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
 
 interface MarketplaceProps {
   items: Item[];
+  currentUser: User | null;
   onItemClick: (item: Item) => void;
 }
 
-export const Marketplace: React.FC<MarketplaceProps> = ({ items, onItemClick }) => {
+export const Marketplace: React.FC<MarketplaceProps> = ({ items, currentUser, onItemClick }) => {
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
   const categories = ['All', 'Electronics', 'Tools', 'Outdoors', 'Home', 'Fashion'];
   
-  const filteredItems = items.filter(i => {
+  // Filter out user's own items from marketplace
+  const marketplaceItems = items.filter(i => !currentUser || i.ownerId !== currentUser.id);
+  
+  const filteredItems = marketplaceItems.filter(i => {
     const matchesCategory = filter === 'All' || i.category === filter;
     const matchesSearch = i.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           i.description.toLowerCase().includes(searchQuery.toLowerCase());

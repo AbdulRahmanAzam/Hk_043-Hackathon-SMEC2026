@@ -196,6 +196,7 @@ const App = () => {
           onRent={(days) => handleCreateTransaction(selectedItem, TransactionType.RENTAL, days)}
           onSwap={() => handleCreateTransaction(selectedItem, TransactionType.BARTER)}
           onViewProfile={(userId) => handleContactUser(userId)}
+          isEditable={false}
         />
       );
     }
@@ -203,7 +204,7 @@ const App = () => {
     // 3. Tab Navigation
     switch (activeTab) {
       case 'market':
-        return <Marketplace items={items} onItemClick={(item) => { setSelectedItem(item); window.scrollTo(0,0); }} />;
+        return <Marketplace items={items} currentUser={currentUser} onItemClick={(item) => { setSelectedItem(item); window.scrollTo(0,0); }} />;
       case 'activity':
         return <Activity 
           transactions={transactions} 
@@ -220,7 +221,7 @@ const App = () => {
       case 'add':
         return <AddItem onAdd={handleAddItem} onCancel={() => handleNavigation('market')} currentUser={currentUser!} />;
       default:
-        return <Marketplace items={items} onItemClick={setSelectedItem} />;
+        return <Marketplace items={items} currentUser={currentUser} onItemClick={setSelectedItem} />;
     }
   };
 

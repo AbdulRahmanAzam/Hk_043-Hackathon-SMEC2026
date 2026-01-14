@@ -28,6 +28,7 @@ interface ItemDetailProps {
   onRent: (days: number) => void;
   onSwap: () => void;
   onViewProfile: (userId: string) => void;
+  isEditable?: boolean; // Allow editing only in dashboard context
 }
 
 export const ItemDetail: React.FC<ItemDetailProps> = ({ 
@@ -38,7 +39,8 @@ export const ItemDetail: React.FC<ItemDetailProps> = ({
   onDelete,
   onRent,
   onSwap,
-  onViewProfile
+  onViewProfile,
+  isEditable = false
 }) => {
   const isGuest = currentUser.id === 'guest';
   const isOwner = !isGuest && currentUser.id === item.ownerId;
@@ -81,7 +83,7 @@ export const ItemDetail: React.FC<ItemDetailProps> = ({
           <ArrowRight className="w-4 h-4 rotate-180 mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Market
         </button>
 
-        {isOwner && !isEditing && (
+        {isOwner && isEditable && !isEditing && (
            <div className="flex gap-2">
              <button 
                onClick={() => setIsEditing(true)} 
@@ -240,7 +242,17 @@ export const ItemDetail: React.FC<ItemDetailProps> = ({
                  </button>
               </div>
 
-              {!isOwner && (
+              {isOwner ? (
+                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 flex items-center gap-4">
+                   <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                     <span className="text-blue-600 font-bold text-lg">ℹ</span>
+                   </div>
+                   <div>
+                     <p className="font-bold text-blue-900 mb-1">This is your item</p>
+                     <p className="text-sm text-blue-700">You can edit or delete this item, but you can't request to rent or swap it with yourself.</p>
+                   </div>
+                </div>
+              ) : (
                 <div className="space-y-4">
                    {item.rentalPricePerDay && (
                      <div className="flex items-center gap-4 p-4 bg-stone-50 rounded-2xl border border-stone-100">
