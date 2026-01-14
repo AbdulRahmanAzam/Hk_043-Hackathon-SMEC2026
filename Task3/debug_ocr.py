@@ -1,14 +1,9 @@
-# debug_ocr.py
-"""
-Debug script to see what OCR is extracting and why totals aren't being calculated
-"""
 from receipt_scanner import ReceiptScanner
 from PIL import Image, ImageDraw, ImageFont
 import os
 import re
 
 def create_sample_receipts():
-    """Create different types of receipt images for testing"""
     print("Creating sample receipts for debugging...")
     
     # Sample 1: Clear receipt with proper formatting
@@ -38,7 +33,6 @@ def create_sample_receipts():
     img1.save('test_receipt_1.jpg')
     print("Created test_receipt_1.jpg")
     
-    # Sample 2: Receipt with total at different position
     img2 = Image.new('RGB', (600, 300), color='white')
     d2 = ImageDraw.Draw(img2)
     text2 = [
@@ -61,7 +55,6 @@ def create_sample_receipts():
     img2.save('test_receipt_2.jpg')
     print("Created test_receipt_2.jpg")
     
-    # Sample 3: Minimal receipt
     img3 = Image.new('RGB', (400, 200), color='white')
     d3 = ImageDraw.Draw(img3)
     text3 = [
@@ -85,7 +78,6 @@ def debug_ocr_extraction():
     """Debug what OCR is extracting and why totals aren't found"""
     scanner = ReceiptScanner()
     
-    # Create test receipts
     test_files = create_sample_receipts()
     
     print("\n" + "="*60)
@@ -96,14 +88,11 @@ def debug_ocr_extraction():
         print(f"\n\nTesting file {i}: {file}")
         print("-"*40)
         
-        # Load image
         img = Image.open(file)
         
-        # Extract text
         text = scanner.extract_text(img)
         print(f"Extracted Text:\n{text}")
         
-        # Parse receipt
         data = scanner.parse_receipt(text)
         print(f"\nParsed Data:")
         print(f"  Merchant: {data.get('merchant')}")
@@ -111,10 +100,8 @@ def debug_ocr_extraction():
         print(f"  Total: {data.get('total')}")
         print(f"  Type of total: {type(data.get('total'))}")
         
-        # Show what patterns matched
         print("\nPattern Matching Debug:")
         
-        # Check for total patterns manually
         total_patterns = [
             r'TOTAL\s*[\$£€]?\s*([\d,]+\.?\d{0,2})',
             r'Total\s*[\$£€]?\s*([\d,]+\.?\d{0,2})',
@@ -133,7 +120,6 @@ def debug_ocr_extraction():
             if match:
                 print(f"  ✓ Matched pattern: {pattern}")
                 print(f"    Captured group: {match.group(1)}")
-                # Try to convert to float
                 try:
                     amount = match.group(1).replace(',', '').strip()
                     float_amount = float(amount)
@@ -149,4 +135,5 @@ def debug_ocr_extraction():
             print(f"Deleted {file}")
 
 if __name__ == "__main__":
+
     debug_ocr_extraction()
