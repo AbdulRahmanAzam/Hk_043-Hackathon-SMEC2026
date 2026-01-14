@@ -1,39 +1,39 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { format } from 'date-fns';
+import { makeQRPayload } from '../../utils/qrHelpers';
+import toast from 'react-hot-toast';
 
-// QRDisplay renders a real scannable QR code containing a JSON payload.
-// Payload: { userId, username, name, timestamp }
-const QRDisplay = ({ user }) => {
-  const payload = {
-    userId: user?.id,
-    username: user?.username,
-    name: user?.name,
-    timestamp: new Date().toISOString(),
-  };
-
-  const value = JSON.stringify(payload);
+const QRGenerator = ({ user }) => {
+  const value = useMemo(() => makeQRPayload(user, true), [user]);
+  const createdAt = useMemo(() => format(new Date(), 'PPpp'), []);
 
   const handleShare = async () => {
     try {
+      const shareData = {
+        title: 'Connect with me',
+        text: `Scan to connect with ${user?.name}`,
+        url: process.env.REACT_APP_BASE_URL || window.location.origin,
+      };
       if (navigator.share) {
-        await navigator.share({ title: 'Connect with me', text: `Connect with ${user.name}`, url: window.location.href });
+        await navigator.share(shareData);
+        toast.success('Shared successfully');
       } else {
         await navigator.clipboard.writeText(value);
-        alert('QR payload copied to clipboard');
+        toast.success('QR payload copied to clipboard');
       }
     } catch (e) {
       console.error('Share failed', e);
-      alert('Unable to share');
+      toast.error('Unable to share');
     }
   };
 
   const handleSaveImage = () => {
     try {
-      const svg = document.querySelector('.qr-display svg');
-      if (!svg) return alert('QR not available');
+      const svg = document.querySelector('.qr-generator svg');
+      if (!svg) return toast.error('QR not available');
       const xml = new XMLSerializer().serializeToString(svg);
       const svg64 = btoa(unescape(encodeURIComponent(xml)));
-      const b64Start = 'data:image/svg+xml;base64,';
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
@@ -46,19 +46,23 @@ const QRDisplay = ({ user }) => {
         a.href = png;
         a.download = `${user?.username || 'qr'}.png`;
         a.click();
+        toast.success('Saved QR as image');
       };
-      img.src = b64Start + svg64;
+      img.src = 'data:image/svg+xml;base64,' + svg64;
     } catch (e) {
       console.error('save image failed', e);
-      alert('Unable to save image');
+      toast.error('Unable to save image');
     }
   };
 
   return (
-    <div className="qr-display" aria-label="Your QR code">
-      <QRCodeSVG value={value} size={200} includeMargin={true} aria-hidden="true" />
+    <div className="qr-generator" role="region" aria-label="Your QR code">
       <div className="qr-meta">
         <div className="qr-username">{user?.username}</div>
+        <div className="qr-info">Generated {createdAt}</div>
+      </div>
+      <QRCodeSVG value={value} size={220} includeMargin={true} aria-hidden="true" />
+      <div className="qr-actions" style={{display:'flex',gap:8,marginTop:12}}>
         <button className="share-btn" onClick={handleShare} aria-label="Share your QR code">Share</button>
         <button className="share-btn" onClick={handleSaveImage} aria-label="Save QR as image">Save Image</button>
       </div>
@@ -66,4 +70,4 @@ const QRDisplay = ({ user }) => {
   );
 };
 
-export default QRDisplay;
+export default QRGenerator;

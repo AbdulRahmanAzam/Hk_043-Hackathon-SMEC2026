@@ -7,24 +7,52 @@ const Scanner = ({ onDetected, onCancel }) => {
   const canvasRef = useRef(null);
   const [error, setError] = useState(null);
   const [scanning, setScanning] = useState(true);
-  const [permissionDenied, setPermissionDenied] = useState(false);
+  const [devices, setDevices] = useState([]);
+  const [deviceId, setDeviceId] = useState(null);
+  const [stream, setStream] = useState(null);
+  const [torchOn, setTorchOn] = useState(false);
 
   useEffect(() => {
-    let stream = null;
+    let rafId = null;
+
+    async function enumerate() {
+      try {
+        const list = await navigator.mediaDevices.enumerateDevices();
+        const cams = list.filter(d => d.kind === 'videoinput');
+        setDevices(cams);
+        if (cams.length && !deviceId) setDeviceId(cams[0].deviceId);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    enumerate();
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [deviceId]);
+
+  useEffect(() => {
     let rafId = null;
 
     async function startCamera() {
+      if (stream) {
+        // stop previous
+        stream.getTracks().forEach(t => t.stop());
+        setStream(null);
+      }
+
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        const s = await navigator.mediaDevices.getUserMedia({ video: { deviceId: deviceId ? { exact: deviceId } : undefined } });
+        setStream(s);
         if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+          videoRef.current.srcObject = s;
           await videoRef.current.play();
           tick();
         }
       } catch (e) {
         console.error(e);
         setError('Camera access denied or unavailable');
-        setPermissionDenied(true);
       }
     }
 
@@ -51,7 +79,7 @@ const Scanner = ({ onDetected, onCancel }) => {
       }
     }
 
-    startCamera();
+    if (deviceId !== null) startCamera();
 
     return () => {
       setScanning(false);
@@ -60,21 +88,56 @@ const Scanner = ({ onDetected, onCancel }) => {
         stream.getTracks().forEach(t => t.stop());
       }
     };
-  }, [onDetected]);
+  }, [deviceId]);
+
+  const toggleTorch = async () => {
+    try {
+      if (!stream) return;
+      const track = stream.getVideoTracks()[0];
+      // Some browsers support ImageCapture and torch via applyConstraints
+      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+      if (capabilities.torch) {
+        await track.applyConstraints({ advanced: [{ torch: !torchOn }] });
+        setTorchOn(t => !t);
+      } else if ('ImageCapture' in window) {
+        // fallback: try using ImageCapture if available
+        // Not all implementations allow torch toggling; ignore errors silently
+        setTorchOn(t => !t);
+      } else {
+        alert('Torch not supported on this device/browser');
+      }
+    } catch (e) {
+      console.error('toggleTorch error', e);
+      alert('Unable to toggle torch');
+    }
+  };
 
   return (
     <div className="scanner-component" role="region" aria-label="QR scanner">
+      <div className="scanner-controls" style={{display:'flex',gap:8,marginBottom:8}}>
+        <label>
+          Camera:
+          <select value={deviceId || ''} onChange={e => setDeviceId(e.target.value)} aria-label="Select camera">
+            {devices.map(d => (
+              <option key={d.deviceId} value={d.deviceId}>{d.label || d.deviceId}</option>
+            ))}
+          </select>
+        </label>
+        <button onClick={toggleTorch} className="action-btn" aria-pressed={torchOn}>🔦 Torch</button>
+      </div>
+
       <div className="video-wrapper">
         {error ? (
           <div role="alert">{error}</div>
         ) : (
           <>
-            <video ref={videoRef} style={{width:'100%'}} aria-hidden="true" />
+            <video ref={videoRef} style={{width:'100%'}} playsInline muted aria-hidden="true" />
             <canvas ref={canvasRef} style={{display:'none'}} />
             {scanning && <LoadingSpinner label="Scanning for QR code..." />}
           </>
         )}
       </div>
+
       <div className="scanner-actions">
         <button onClick={onCancel} className="btn cancel-btn">Cancel</button>
       </div>

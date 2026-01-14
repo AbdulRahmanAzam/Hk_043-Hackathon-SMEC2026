@@ -2,10 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import ErrorBoundary from './components/ErrorBoundary';
 import UserProfile from './components/UserProfile';
-import Scanner from './components/Scanner';
-import QRDisplay from './components/QRDisplay';
+import QRScanner from './components/QRScanner/QRScanner';
+import QRGenerator from './components/QRGenerator/QRGenerator';
 import ConnectionsList from './components/ConnectionsList';
 import { loadUser, saveUser, loadConnections, saveConnections } from './utils/storage';
+import { parseQRPayload } from './utils/qrHelpers';
+import toast, { Toaster } from 'react-hot-toast';
 
 const sampleUser = {
   id: 'user_001',
@@ -20,7 +22,18 @@ function App() {
   const [connections, setConnectionsState] = useState(() => loadConnections());
   const [scanning, setScanning] = useState(false);
   const [showMyQR, setShowMyQR] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
+  useEffect(() => {
+    const onOnline = () => { setIsOnline(true); toast.success('You are online'); };
+    const onOffline = () => { setIsOnline(false); toast.error('You are offline'); };
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, []);
   useEffect(() => {
     saveUser(currentUser);
   }, [currentUser]);
@@ -38,36 +51,48 @@ function App() {
   }, []);
 
   const handleStartScan = () => {
+    console.log('Start scan clicked');
     setScanning(true);
     setShowMyQR(false);
   };
 
   const handleDetected = (data) => {
     setScanning(false);
-    // Expected format: qrconnect://user/{id}
     try {
-      let id = data;
-      if (data.startsWith('qrconnect://user/')) {
-        id = data.replace('qrconnect://user/', '');
+      const payload = parseQRPayload(data);
+      let id, username, name;
+      if (payload && (payload.userId || payload.id)) {
+        id = payload.userId || payload.id;
+        username = payload.username || `@${id}`;
+        name = payload.name || `Friend ${String(id).slice(-6)}`;
+      } else {
+        // Fallback: accept legacy or raw id
+        let raw = String(data || '');
+        if (raw.startsWith('qrconnect://user/')) raw = raw.replace('qrconnect://user/', '');
+        id = raw || `user_${Date.now()}`;
+        username = `@${id}`;
+        name = `Friend ${String(id).slice(-6)}`;
       }
+
       const newConn = {
         id: `conn_${Date.now()}`,
-        name: `Friend ${id.slice(-6)}`,
-        username: `@${id}`,
-        connectedDate: new Date().toISOString().split('T')[0],
-        avatar: id.slice(0,2).toUpperCase()
+        name,
+        username,
+        connectedDate: new Date().toISOString(),
+        avatar: String((username || '').slice(1,3)).toUpperCase()
       };
       setConnections(prev => [newConn, ...prev]);
-      alert(`Connected with ${newConn.name}`);
+      toast.success(`Connected with ${newConn.name}`);
     } catch (e) {
-      console.error('Failed to parse QR data', e);
-      alert('Scanned data is invalid');
+      console.error('Failed to handle scanned data', e);
+      toast.error('Scanned data is invalid');
     }
   };
 
   const handleCancelScan = () => setScanning(false);
 
   const handleShowMyQR = () => {
+    console.log('Show My QR clicked - previous:', showMyQR);
     setShowMyQR(s => !s);
     setScanning(false);
   };
@@ -82,7 +107,7 @@ function App() {
           </div>
           <UserProfile user={currentUser} setUser={setCurrentUser} />
         </header>
-
+        <Toaster position="top-right" />
         <main className="app-main">
           <div className="stats-card" role="region" aria-label="statistics">
             <div className="stat">
@@ -93,6 +118,10 @@ function App() {
               <div className="stat-value">{currentUser?.connections || 0}</div>
               <div className="stat-label">Total</div>
             </div>
+            <div className="stat">
+              <div className="stat-value" style={{fontSize:'0.9rem'}}>{isOnline ? 'Online' : 'Offline'}</div>
+              <div className="stat-label">Network</div>
+            </div>
           </div>
 
           <div className="action-buttons" role="group" aria-label="actions">
@@ -102,13 +131,13 @@ function App() {
 
           {scanning && (
             <section id="scanner" aria-live="polite">
-              <Scanner onDetected={handleDetected} onCancel={handleCancelScan} />
+              <QRScanner onDetected={handleDetected} onCancel={handleCancelScan} />
             </section>
           )}
 
           {showMyQR && (
             <section id="my-qr">
-              <QRDisplay user={currentUser} />
+              <QRGenerator user={currentUser} />
             </section>
           )}
 

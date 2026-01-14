@@ -1,70 +1,74 @@
-# Getting Started with Create React App
+# QR Connect Platform
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A simple app to instantly connect with friends by scanning and sharing QR codes. Includes a privacy-aware QR generator, camera-based scanner, connection list with search/remove/export, local persistence, and online/offline status.
 
-## Available Scripts
+## Quick Start
 
-In the project directory, you can run:
+- `npm install`
+- `npm start`
+- Open `https://localhost:3000` (HTTPS is enabled for camera access).
 
-### `npm start`
+## Environment Setup
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Create `.env` with production-safe defaults:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```
+REACT_APP_BASE_URL=
+REACT_APP_ENCRYPTION_KEY=
+```
 
-### `npm test`
+Create `.env.development.local` for local dev:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+HOST=0.0.0.0
+HTTPS=true
+WDS_SOCKET_PORT=3000
+REACT_APP_BASE_URL=https://localhost:3000
+REACT_APP_ENCRYPTION_KEY=dev-secret-key-please-change
+```
 
-### `npm run build`
+- `HOST=0.0.0.0`: exposes dev server on your LAN for mobile testing.
+- `HTTPS=true`: required for mobile camera access.
+- `WDS_SOCKET_PORT=3000`: fixes hot reload when accessed via IP.
+- `REACT_APP_ENCRYPTION_KEY`: set any string to enable AES encryption of QR payloads.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Mobile Testing over LAN
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+You have two reliable options:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Secure Tunnel (recommended):
+  - Cloudflare Tunnel: `cloudflared tunnel --url https://localhost:3000` → use the generated `https://*.trycloudflare.com` URL on mobile.
+  - Ngrok: `ngrok http https://localhost:3000` → use the `https://` URL on mobile.
+  - Benefits: Trusted HTTPS, no cert installation, works anywhere.
 
-### `npm run eject`
+- Locally Trusted Certificate (advanced):
+  - Install `mkcert` and create a cert for your LAN IP, e.g. `mkcert 192.168.x.x`.
+  - Trust the mkcert root CA on your phone (open `rootCA.pem` and follow device steps).
+  - Configure CRA to use the cert: place `server.key` and `server.crt` under a folder and set `SSL_CRT_FILE` and `SSL_KEY_FILE` envs (or use `react-app-rewired` with `devServer` config).
+  - Use `https://<LAN-IP>:3000` on mobile once trusted.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+If you see a “connection not secure” error on mobile, the certificate is untrusted. Use the secure tunnel approach or fully trust the local CA on the device.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Features
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- Privacy-aware QR generator: toggles to share/hide name and username.
+- QR scanner: `react-zxing` camera, cancel button, and error toasts.
+- Connection list: search, remove, CSV export, details modal.
+- Persistence: `localStorage` via `utils/storage`.
+- Online/offline indicator with toast notifications.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Testing
 
-## Learn More
+- Unit tests for QR helpers: `npm test -- --watch=false`.
+- App test checks for title and network label.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Tips
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- When encryption key is set, QR value is an AES-wrapped JSON string; receivers must use the same key to parse.
+- Without a key, QR value is plain JSON including `userId`, optional `username`/`name`, and `baseUrl`.
+- For sharing QR as an image, use the “Save Image” button in My QR.
 
-### Code Splitting
+## Production Build
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- `npm run build` to create an optimized bundle.
+- Host behind a trusted HTTPS domain to ensure camera access on phones.
