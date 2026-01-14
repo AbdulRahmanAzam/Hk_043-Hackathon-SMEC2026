@@ -1,4 +1,3 @@
-# main.py
 from flask import Flask, request, jsonify, send_file
 import io
 import base64
@@ -9,7 +8,6 @@ from visualizer import ExpenseVisualizer
 
 app = Flask(__name__)
 
-# Initialize components
 scanner = ReceiptScanner()
 tracker = ExpenseTracker()
 visualizer = ExpenseVisualizer(tracker)
@@ -23,11 +21,9 @@ def scan_receipt():
     image_file = request.files['image']
     image = Image.open(image_file)
     
-    # Extract text and parse receipt
     text = scanner.extract_text(image)
     receipt_data = scanner.parse_receipt(text)
     
-    # Add to expense tracker
     expense = tracker.add_expense(receipt_data)
     
     return jsonify({
@@ -54,7 +50,6 @@ def visual_report(year, month):
     """Generate visual report"""
     fig = visualizer.create_monthly_chart(year, month)
     
-    # Convert plot to image
     img_bytes = fig.to_image(format="png")
     return send_file(
         io.BytesIO(img_bytes),
@@ -76,4 +71,5 @@ def spending_trends():
     )
 
 if __name__ == '__main__':
+
     app.run(debug=True, port=5000)
