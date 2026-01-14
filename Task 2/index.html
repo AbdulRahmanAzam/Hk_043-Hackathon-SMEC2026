@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopSmart - Compare Prices</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    
+    <!-- navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fas fa-shopping-bag"></i> ShopSmart
+            </a>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#features">Features</a>
+                <a href="#about">About</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- main hero section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Find Best Deals Across Multiple Stores</h1>
+            <p>Compare prices from FakeStore, DummyJSON & Platzi in real-time</p>
+            
+            <!-- search area -->
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search for products... (try: shirt, jacket, shoes)">
+                    <button id="searchBtn"><i class="fas fa-search"></i> Search</button>
+                </div>
+            </div>
+
+            <!-- quick category buttons -->
+            <div class="quick-cats">
+                <button class="cat-btn" data-cat="electronics">Electronics</button>
+                <button class="cat-btn" data-cat="clothing">Clothing</button>
+                <button class="cat-btn" data-cat="shoes">Shoes</button>
+                <button class="cat-btn" data-cat="furniture">Furniture</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- filters section - shows after search -->
+    <section id="filterSection" class="filter-section hidden">
+        <div class="container">
+            <div class="filter-bar">
+                <div class="filter-left">
+                    <span class="result-count" id="resultCount">0 products found</span>
+                </div>
+                <div class="filter-right">
+                    <select id="sortBy">
+                        <option value="bestmatch">Best Match</option>
+                        <option value="lowprice">Price: Low to High</option>
+                        <option value="highprice">Price: High to Low</option>
+                        <option value="rating">Best Rating</option>
+                        <option value="name">Name A-Z</option>
+                    </select>
+                    <select id="storeFilter">
+                        <option value="all">All Stores</option>
+                        <option value="fakestore">FakeStore</option>
+                        <option value="dummyjson">DummyJSON</option>
+                        <option value="platzi">Platzi Store</option>
+                    </select>
+                    <div class="price-filter">
+                        <input type="number" id="minPrice" placeholder="Min $">
+                        <span>-</span>
+                        <input type="number" id="maxPrice" placeholder="Max $">
+                        <button id="priceFilterBtn">Go</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- best deal banner -->
+    <section id="bestDealSection" class="best-deal-section hidden">
+        <div class="container">
+            <div class="best-deal-card">
+                <div class="deal-badge">
+                    <i class="fas fa-fire"></i> BEST PRICE
+                </div>
+                <div class="deal-content">
+                    <img id="bestDealImg" src="" alt="Best Deal">
+                    <div class="deal-info">
+                        <h3 id="bestDealTitle">Product Name</h3>
+                        <p id="bestDealStore" class="store-name">Store Name</p>
+                        <div class="deal-price">
+                            <span class="price" id="bestDealPrice">$0.00</span>
+                            <span class="savings" id="bestDealSavings">Save $0.00 vs others</span>
+                        </div>
+                        <a href="#" id="bestDealLink" target="_blank" class="deal-btn">View Deal</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- loading spinner -->
+    <div id="loader" class="loader hidden">
+        <div class="spinner"></div>
+        <p>Fetching prices from stores...</p>
+    </div>
+
+    <!-- products grid -->
+    <section id="productsSection" class="products-section hidden">
+        <div class="container">
+            <h2 class="section-title">Search Results</h2>
+            <div id="productsGrid" class="products-grid">
+                <!-- products added here by js -->
+            </div>
+        </div>
+    </section>
+
+    <!-- no results -->
+    <div id="noResults" class="no-results hidden">
+        <i class="fas fa-search"></i>
+        <h3>No products found</h3>
+        <p>Try different keywords or browse categories</p>
+    </div>
+
+    <!-- features section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <h2>Why Use ShopSmart?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Real-Time Prices</h3>
+                    <p>Get live prices from multiple e-commerce stores instantly</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-balance-scale"></i>
+                    <h3>Easy Comparison</h3>
+                    <p>Compare products side by side from different stores</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-filter"></i>
+                    <h3>Smart Filters</h3>
+                    <p>Filter by price, rating, store and more</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-piggy-bank"></i>
+                    <h3>Save Money</h3>
+                    <p>Find the best deals and save on every purchase</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- stats section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-num" id="totalProducts">0</span>
+                    <span class="stat-label">Products Compared</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">3</span>
+                    <span class="stat-label">Stores Connected</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num" id="avgSavings">20%</span>
+                    <span class="stat-label">Avg. Savings</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- about -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <h2>About ShopSmart</h2>
+            <p>ShopSmart helps you compare prices across multiple online stores. We fetch real-time data from various e-commerce APIs to show you the best available prices.</p>
+            <div class="stores-list">
+                <div class="store-item">
+                    <span class="store-dot fakestore"></span>
+                    FakeStore API
+                </div>
+                <div class="store-item">
+                    <span class="store-dot dummyjson"></span>
+                    DummyJSON
+                </div>
+                <div class="store-item">
+                    <span class="store-dot platzi"></span>
+                    Platzi Store
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>ShopSmart &copy; 2026 | SMEC Hackathon - Team Hk_043</p>
+        </div>
+    </footer>
+
+    <!-- comparison modal -->
+    <div id="compareModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2>Price Comparison</h2>
+            <div id="compareGrid" class="compare-grid">
+                <!-- comparison items go here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- wishlist sidebar -->
+    <div id="wishlistPanel" class="wishlist-panel hidden">
+        <div class="wishlist-header">
+            <h3>My Wishlist</h3>
+            <button id="closeWishlist">&times;</button>
+        </div>
+        <div id="wishlistItems" class="wishlist-items">
+            <!-- wishlist items here -->
+        </div>
+    </div>
+
+    <!-- floating wishlist button -->
+    <button id="wishlistBtn" class="wishlist-float-btn">
+        <i class="fas fa-heart"></i>
+        <span id="wishlistCount">0</span>
+    </button>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
