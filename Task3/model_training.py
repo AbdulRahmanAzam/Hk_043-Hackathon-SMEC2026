@@ -1,4 +1,3 @@
-# model_training.py
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
@@ -22,27 +21,19 @@ class SROIEDataset(Dataset):
         ann_path = os.path.join(self.annotation_dir, 
                                self.image_files[idx].replace('.jpg', '.txt'))
         
-        # Load image
         image = Image.open(img_path).convert('RGB')
         
-        # Load annotations
         with open(ann_path, 'r') as f:
             annotations = json.load(f)
-        
-        # Process for LayoutLM
-        # ... (implement tokenization and bounding box extraction)
-        
         return image, annotations
 
 def train_receipt_model():
     """Train a custom model on SROIE dataset"""
-    # Initialize model
     model = LayoutLMForTokenClassification.from_pretrained(
         "microsoft/layoutlm-base-uncased",
-        num_labels=5  # Adjust based on your entity types
+        num_labels=5
     )
     
-    # Prepare dataset
     dataset = SROIEDataset("data/images", "data/annotations")
     dataloader = DataLoader(dataset, batch_size=8, shuffle=True)
     
@@ -61,6 +52,5 @@ def train_receipt_model():
             optimizer.zero_grad()
             
         print(f"Epoch {epoch+1}, Loss: {loss.item()}")
-    
-    # Save model
+
     torch.save(model.state_dict(), "receipt_model.pth")
