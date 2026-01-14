@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyrics Extractor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 YouTube Lyrics Extractor</h1>
+            <p>Extract lyrics from any YouTube song using AI</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <div class="url-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="ytUrl" 
+                        placeholder="Paste YouTube URL here (e.g., https://youtube.com/watch?v=...)"
+                    >
+                    <button id="extractBtn" onclick="startExtraction()">
+                        Extract Lyrics
+                    </button>
+                </div>
+            </section>
+
+            <section id="progressSection" class="progress-section hidden">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p id="statusText">Starting...</p>
+            </section>
+
+            <section id="resultsSection" class="results-section hidden">
+                <div class="result-card">
+                    <h2>Word Cloud</h2>
+                    <div class="wordcloud-container">
+                        <img id="wordcloudImg" src="" alt="Word Cloud">
+                    </div>
+                    <button class="download-btn" onclick="downloadWordcloud()">
+                        Download Word Cloud
+                    </button>
+                </div>
+
+                <div class="result-card">
+                    <h2>Extracted Lyrics</h2>
+                    <div class="lyrics-container">
+                        <pre id="lyricsText"></pre>
+                    </div>
+                    <button class="download-btn" onclick="downloadPdf()">
+                        Download as PDF
+                    </button>
+                </div>
+            </section>
+
+            <section id="errorSection" class="error-section hidden">
+                <p id="errorText"></p>
+                <button onclick="resetForm()">Try Again</button>
+            </section>
+        </main>
+
+        <footer>
+            <p>Educational Project - Speech-to-Text powered by Whisper</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
