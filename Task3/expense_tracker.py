@@ -1,4 +1,3 @@
-# expense_tracker.py
 import pandas as pd
 from datetime import datetime
 import json
@@ -14,10 +13,8 @@ class ExpenseTracker:
         try:
             if os.path.exists(self.db_path):
                 self.df = pd.read_csv(self.db_path)
-                # Ensure date column is datetime
                 if 'date' in self.df.columns:
                     self.df['date'] = pd.to_datetime(self.df['date'], errors='coerce')
-                # Ensure amount is numeric
                 if 'amount' in self.df.columns:
                     self.df['amount'] = pd.to_numeric(self.df['amount'], errors='coerce').fillna(0)
             else:
@@ -34,7 +31,6 @@ class ExpenseTracker:
     
     def add_expense(self, receipt_data, category=None, payment_method='Cash'):
         """Add new expense from receipt"""
-        # Build a proper description from receipt items or use a default
         items = receipt_data.get('items', [])
         if items:
             description = ', '.join([item.get('name', '') for item in items[:3]])
@@ -52,8 +48,6 @@ class ExpenseTracker:
             'description': description,
             'payment_method': payment_method
         }
-        
-        # Use pd.concat instead of deprecated append
         new_row = pd.DataFrame([expense])
         self.df = pd.concat([self.df, new_row], ignore_index=True)
         self.save_expenses()
@@ -91,7 +85,6 @@ class ExpenseTracker:
         
         df = self.df.copy()
         df['date'] = pd.to_datetime(df['date'], errors='coerce')
-        # Ensure amount is numeric
         df['amount'] = pd.to_numeric(df['amount'], errors='coerce').fillna(0)
         
         if year and month:
@@ -109,11 +102,9 @@ class ExpenseTracker:
                 'transaction_count': 0
             }
         
-        # Calculate daily average safely
         daily_sums = df.groupby(df['date'].dt.date)['amount'].sum()
         avg_daily = daily_sums.mean() if len(daily_sums) > 0 else 0
         
-        # Get top merchants safely
         try:
             merchant_sums = df.groupby('merchant')['amount'].sum()
             top_merchants = merchant_sums.nlargest(5).to_dict() if len(merchant_sums) > 0 else {}
@@ -138,7 +129,6 @@ class ExpenseTracker:
             return alerts
         
         try:
-            # Monthly budget check
             monthly_summary = self.get_monthly_summary(
                 datetime.now().year, 
                 datetime.now().month
@@ -160,7 +150,6 @@ class ExpenseTracker:
                         'severity': 'medium'
                     })
             
-            # Unusual spending patterns
             df = self.df.copy()
             df['date'] = pd.to_datetime(df['date'], errors='coerce')
             df = df.dropna(subset=['date'])
@@ -176,7 +165,6 @@ class ExpenseTracker:
                         'severity': 'medium'
                     })
             
-            # Category over-spending
             if len(df) > 0:
                 category_totals = df.groupby('category')['amount'].sum()
                 avg_category = category_totals.mean()
@@ -198,4 +186,5 @@ class ExpenseTracker:
         try:
             self.df.to_csv(self.db_path, index=False)
         except Exception as e:
+
             print(f"Error saving expenses: {e}")
