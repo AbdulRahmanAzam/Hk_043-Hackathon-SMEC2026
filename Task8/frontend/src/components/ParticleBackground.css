@@ -1,0 +1,8 @@
+.particle-canvas {
+  opacity: 0.6;
+  transition: opacity 0.5s ease;
+}
+
+.particle-canvas:hover {
+  opacity: 0.8;
+}
