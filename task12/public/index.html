@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniRide Karachi - University Carpool Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo" onclick="showPage('home')">
+                <span class="logo-icon">🚗</span>
+                <span class="logo-text">UniRide<span class="logo-accent">KHI</span></span>
+            </a>
+            
+            <div class="nav-links" id="navLinks">
+                <a href="#" class="nav-link" onclick="showPage('search')">Find Rides</a>
+                <a href="#" class="nav-link" onclick="showPage('post-ride')" id="postRideLink" style="display:none;">Post Ride</a>
+                <a href="#" class="nav-link" onclick="showPage('my-rides')" id="myRidesLink" style="display:none;">My Rides</a>
+                <a href="#" class="nav-link" onclick="showPage('bookings')" id="myBookingsLink" style="display:none;">Bookings</a>
+            </div>
+
+            <div class="nav-auth" id="navAuth">
+                <button class="btn btn-outline" onclick="showPage('login')">Login</button>
+                <button class="btn btn-primary" onclick="showPage('signup')">Sign Up</button>
+            </div>
+            
+            <div class="nav-user" id="navUser" style="display:none;">
+                <div class="user-dropdown">
+                    <button class="user-btn" id="userBtn">
+                        <span class="user-avatar" id="userAvatar">U</span>
+                        <span class="user-name" id="userName">User</span>
+                        <svg class="dropdown-arrow" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="#" onclick="showPage('profile')">Profile</a>
+                        <a href="#" onclick="showPage('history')">Ride History</a>
+                        <hr>
+                        <a href="#" onclick="logout()" class="text-danger">Logout</a>
+                    </div>
+                </div>
+            </div>
+
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Home Page -->
+        <section class="page active" id="homePage">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">Share Your Ride,<br>Save Your <span class="text-accent">Pocket</span></h1>
+                    <p class="hero-subtitle">The exclusive carpool platform for Karachi university students. Safe, affordable, and eco-friendly commuting.</p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary btn-lg" onclick="showPage('search')">
+                            <span>Find a Ride</span>
+                            <svg viewBox="0 0 20 20" fill="currentColor" class="btn-icon">
+                                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-outline btn-lg" onclick="showPage('signup')">Offer a Ride</button>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-number">10+</span>
+                            <span class="stat-label">Universities</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">Safe</span>
+                            <span class="stat-label">Verified Students</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">₨</span>
+                            <span class="stat-label">Split Fuel Costs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-map" id="heroMap"></div>
+                </div>
+            </div>
+
+            <div class="features-section">
+                <h2 class="section-title">Why UniRide Karachi?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎓</div>
+                        <h3>University Verified</h3>
+                        <p>Only students with valid university emails can join. Your safety is our priority.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>Split Fuel Costs</h3>
+                        <p>Share rides, share costs. Save up to 70% on your daily commute expenses.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🗺️</div>
+                        <h3>Karachi Routes</h3>
+                        <p>Real driving distances and ETAs for Karachi roads. No guesswork.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⭐</div>
+                        <h3>Rated Community</h3>
+                        <p>Rate and review your rides. Build trust within your university community.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="universities-section">
+                <h2 class="section-title">Supported Universities</h2>
+                <div class="universities-list">
+                    <span class="university-tag">FAST-NUCES</span>
+                    <span class="university-tag">IBA Karachi</span>
+                    <span class="university-tag">NUST</span>
+                    <span class="university-tag">LUMS</span>
+                    <span class="university-tag">SZABIST</span>
+                    <span class="university-tag">Bahria University</span>
+                    <span class="university-tag">NED University</span>
+                    <span class="university-tag">University of Karachi</span>
+                    <span class="university-tag">Aga Khan University</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Page -->
+        <section class="page" id="loginPage">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <h2 class="auth-title">Welcome Back</h2>
+                    <p class="auth-subtitle">Login to continue your journey</p>
+                    
+                    <form id="loginForm" onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="loginEmail">University Email</label>
+                            <input type="email" id="loginEmail" placeholder="your.name@nu.edu.pk" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                        </div>
+                        <div class="form-error" id="loginError"></div>
+                        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
+                            <span>Login</span>
+                        </button>
+                    </form>
+                    
+                    <p class="auth-footer">
+                        Don't have an account? <a href="#" onclick="showPage('signup')">Sign up</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Signup Page -->
+        <section class="page" id="signupPage">
+            <div class="auth-container">
+                <div class="auth-card auth-card-wide">
+                    <h2 class="auth-title">Join UniRide</h2>
+                    <p class="auth-subtitle">Create your account with your university email</p>
+                    
+                    <form id="signupForm" onsubmit="handleSignup(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="signupName">Full Name</label>
+                                <input type="text" id="signupName" placeholder="Muhammad Ali" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signupEmail">University Email</label>
+                                <input type="email" id="signupEmail" placeholder="your.name@nu.edu.pk" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="signupPassword">Password</label>
+                                <input type="password" id="signupPassword" placeholder="Min 8 chars, uppercase, number" required minlength="8">
+                            </div>
+                            <div class="form-group">
+                                <label for="signupConfirmPassword">Confirm Password</label>
+                                <input type="password" id="signupConfirmPassword" placeholder="Confirm your password" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="signupDepartment">Department</label>
+                                <input type="text" id="signupDepartment" placeholder="Computer Science">
+                            </div>
+                            <div class="form-group">
+                                <label for="signupSemester">Semester</label>
+                                <select id="signupSemester">
+                                    <option value="">Select Semester</option>
+                                    <option value="1">1st Semester</option>
+                                    <option value="2">2nd Semester</option>
+                                    <option value="3">3rd Semester</option>
+                                    <option value="4">4th Semester</option>
+                                    <option value="5">5th Semester</option>
+                                    <option value="6">6th Semester</option>
+                                    <option value="7">7th Semester</option>
+                                    <option value="8">8th Semester</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="signupGender">Gender (Optional)</label>
+                                <select id="signupGender">
+                                    <option value="prefer_not_to_say">Prefer not to say</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="signupRole">I want to</label>
+                                <select id="signupRole" required>
+                                    <option value="rider">Find rides (Rider)</option>
+                                    <option value="driver">Offer rides (Driver)</option>
+                                    <option value="both">Both</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="signupPhone">Phone Number (Optional)</label>
+                            <input type="tel" id="signupPhone" placeholder="03XX-XXXXXXX">
+                        </div>
+                        <div class="form-error" id="signupError"></div>
+                        <button type="submit" class="btn btn-primary btn-block" id="signupBtn">
+                            <span>Create Account</span>
+                        </button>
+                    </form>
+                    
+                    <p class="auth-footer">
+                        Already have an account? <a href="#" onclick="showPage('login')">Login</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search Rides Page -->
+        <section class="page" id="searchPage">
+            <div class="search-container">
+                <div class="search-sidebar">
+                    <h2 class="sidebar-title">Find a Ride</h2>
+                    
+                    <div class="search-form">
+                        <div class="form-group">
+                            <label>Pickup Location</label>
+                            <div class="location-input">
+                                <input type="text" id="searchSource" placeholder="Click on map or type address" readonly>
+                                <button type="button" class="location-btn" onclick="setLocationMode('source')" title="Set on map">
+                                    📍
+                                </button>
+                            </div>
+                            <input type="hidden" id="searchSourceLat">
+                            <input type="hidden" id="searchSourceLng">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Drop Location</label>
+                            <div class="location-input">
+                                <input type="text" id="searchDestination" placeholder="Click on map or type address" readonly>
+                                <button type="button" class="location-btn" onclick="setLocationMode('destination')" title="Set on map">
+                                    📍
+                                </button>
+                            </div>
+                            <input type="hidden" id="searchDestLat">
+                            <input type="hidden" id="searchDestLng">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="searchDate">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>From Time</label>
+                                <input type="time" id="searchTimeFrom">
+                            </div>
+                            <div class="form-group">
+                                <label>To Time</label>
+                                <input type="time" id="searchTimeTo">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Search Radius: <span id="radiusValue">3</span> km</label>
+                            <input type="range" id="searchRadius" min="1" max="10" value="3" oninput="document.getElementById('radiusValue').textContent = this.value">
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block" onclick="searchRides()">
+                            <span>Search Rides</span>
+                        </button>
+                        
+                        <button class="btn btn-outline btn-block" onclick="clearSearch()">
+                            Clear Filters
+                        </button>
+                    </div>
+                    
+                    <div class="search-results" id="searchResults">
+                        <div class="results-header">
+                            <h3>Available Rides</h3>
+                            <span class="results-count" id="resultsCount">0 rides found</span>
+                        </div>
+                        <div class="results-list" id="resultsList">
+                            <div class="no-results">
+                                <p>🔍 Search for rides to see results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="search-map">
+                    <div id="searchMapContainer" class="map-container">
+                        <div class="map-loading">Loading Karachi Map...</div>
+                    </div>
+                    <div class="map-legend">
+                        <span class="legend-item"><span class="legend-dot source"></span> Pickup</span>
+                        <span class="legend-item"><span class="legend-dot dest"></span> Drop</span>
+                        <span class="legend-item"><span class="legend-dot ride"></span> Available Rides</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Post Ride Page -->
+        <section class="page" id="postRidePage">
+            <div class="post-container">
+                <div class="post-form-container">
+                    <h2 class="page-title">Post a Ride</h2>
+                    <p class="page-subtitle">Share your journey with fellow university students</p>
+                    
+                    <form id="postRideForm" onsubmit="handlePostRide(event)">
+                        <div class="form-section">
+                            <h3 class="form-section-title">📍 Route Details</h3>
+                            
+                            <div class="form-group">
+                                <label>Pickup Location</label>
+                                <div class="location-input">
+                                    <input type="text" id="postSource" placeholder="Click on map to select" readonly required>
+                                    <button type="button" class="location-btn active" onclick="setPostLocationMode('source')" id="postSourceBtn">
+                                        📍
+                                    </button>
+                                </div>
+                                <input type="hidden" id="postSourceLat" required>
+                                <input type="hidden" id="postSourceLng" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Drop Location</label>
+                                <div class="location-input">
+                                    <input type="text" id="postDestination" placeholder="Click on map to select" readonly required>
+                                    <button type="button" class="location-btn" onclick="setPostLocationMode('destination')" id="postDestBtn">
+                                        🎯
+                                    </button>
+                                </div>
+                                <input type="hidden" id="postDestLat" required>
+                                <input type="hidden" id="postDestLng" required>
+                            </div>
+                            
+                            <div class="route-info" id="routeInfo" style="display: none;">
+                                <div class="route-stat">
+                                    <span class="route-label">Distance</span>
+                                    <span class="route-value" id="routeDistance">-- km</span>
+                                </div>
+                                <div class="route-stat">
+                                    <span class="route-label">Est. Duration</span>
+                                    <span class="route-value" id="routeDuration">-- mins</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3 class="form-section-title">📅 Schedule</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Departure Date</label>
+                                    <input type="date" id="postDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Departure Time</label>
+                                    <input type="time" id="postTime" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3 class="form-section-title">💺 Seats & Price</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Available Seats</label>
+                                    <select id="postSeats" required>
+                                        <option value="1">1 Seat</option>
+                                        <option value="2">2 Seats</option>
+                                        <option value="3" selected>3 Seats</option>
+                                        <option value="4">4 Seats</option>
+                                        <option value="5">5 Seats</option>
+                                        <option value="6">6 Seats</option>
+                                        <option value="7">7 Seats</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Fuel Split Price (PKR) - Optional</label>
+                                    <input type="number" id="postPrice" placeholder="e.g., 150" min="0" max="5000">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3 class="form-section-title">📝 Ride Rules (Optional)</h3>
+                            <div class="form-group">
+                                <textarea id="postRules" placeholder="e.g., No smoking, Ladies only, Music allowed..." rows="3" maxlength="500"></textarea>
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" id="postDistanceKm">
+                        <input type="hidden" id="postDuration">
+                        <input type="hidden" id="postPolyline">
+                        
+                        <div class="form-error" id="postRideError"></div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg btn-block" id="postRideBtn">
+                            <span>Post Ride</span>
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="post-map-container">
+                    <div id="postMapContainer" class="map-container">
+                        <div class="map-loading">Loading Karachi Map...</div>
+                    </div>
+                    <div class="map-instructions">
+                        <p>👆 Click on the map to set your <strong id="currentLocationMode">pickup</strong> location</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- My Rides Page (Driver) -->
+        <section class="page" id="myRidesPage">
+            <div class="container">
+                <h2 class="page-title">My Posted Rides</h2>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="loadMyRides('active')">Active</button>
+                    <button class="tab" onclick="loadMyRides('completed')">Completed</button>
+                    <button class="tab" onclick="loadMyRides('cancelled')">Cancelled</button>
+                </div>
+                
+                <div class="rides-grid" id="myRidesList">
+                    <div class="loading">Loading your rides...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- My Bookings Page (Rider) -->
+        <section class="page" id="bookingsPage">
+            <div class="container">
+                <h2 class="page-title">My Bookings</h2>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="loadMyBookings('upcoming')">Upcoming</button>
+                    <button class="tab" onclick="loadMyBookings('past')">Past</button>
+                </div>
+                
+                <div class="bookings-grid" id="myBookingsList">
+                    <div class="loading">Loading your bookings...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ride Details Page -->
+        <section class="page" id="rideDetailsPage">
+            <div class="ride-details-container">
+                <div class="ride-details-content" id="rideDetailsContent">
+                    <div class="loading">Loading ride details...</div>
+                </div>
+                <div class="ride-details-map">
+                    <div id="rideDetailsMap" class="map-container"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Page -->
+        <section class="page" id="profilePage">
+            <div class="container">
+                <div class="profile-container">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="profileAvatar">U</div>
+                        <div class="profile-info">
+                            <h2 id="profileName">Loading...</h2>
+                            <p id="profileUniversity"></p>
+                            <div class="profile-rating">
+                                <span class="stars" id="profileRating">★★★★★</span>
+                                <span id="profileRatingCount">(0 ratings)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-card">
+                            <span class="stat-value" id="profileRidesCompleted">0</span>
+                            <span class="stat-label">Rides Completed</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="profileRidesPosted">0</span>
+                            <span class="stat-label">Rides Posted</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="profileRidesTaken">0</span>
+                            <span class="stat-label">Rides Taken</span>
+                        </div>
+                        <div class="stat-card warning">
+                            <span class="stat-value" id="profileNoShows">0</span>
+                            <span class="stat-label">No Shows</span>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-details">
+                        <h3>Profile Details</h3>
+                        <form id="profileForm" onsubmit="handleUpdateProfile(event)">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" id="profileEditName">
+                                </div>
+                                <div class="form-group">
+                                    <label>Department</label>
+                                    <input type="text" id="profileEditDept">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Semester</label>
+                                    <select id="profileEditSemester">
+                                        <option value="">Select</option>
+                                        <option value="1">1st</option>
+                                        <option value="2">2nd</option>
+                                        <option value="3">3rd</option>
+                                        <option value="4">4th</option>
+                                        <option value="5">5th</option>
+                                        <option value="6">6th</option>
+                                        <option value="7">7th</option>
+                                        <option value="8">8th</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone</label>
+                                    <input type="tel" id="profileEditPhone">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Role</label>
+                                    <select id="profileEditRole">
+                                        <option value="rider">Rider</option>
+                                        <option value="driver">Driver</option>
+                                        <option value="both">Both</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Page -->
+        <section class="page" id="historyPage">
+            <div class="container">
+                <h2 class="page-title">Ride History</h2>
+                
+                <div class="history-filters">
+                    <select id="historyFilter" onchange="loadHistory()">
+                        <option value="all">All Rides</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="no_show">No Shows</option>
+                    </select>
+                </div>
+                
+                <div class="history-list" id="historyList">
+                    <div class="loading">Loading history...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Booking Modal -->
+    <div class="modal" id="bookingModal">
+        <div class="modal-overlay" onclick="closeModal('bookingModal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Booking</h3>
+                <button class="modal-close" onclick="closeModal('bookingModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="bookingModalBody">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('bookingModal')">Cancel</button>
+                <button class="btn btn-primary" id="confirmBookingBtn" onclick="confirmBooking()">Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div class="modal" id="ratingModal">
+        <div class="modal-overlay" onclick="closeModal('ratingModal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Rate Your Ride</h3>
+                <button class="modal-close" onclick="closeModal('ratingModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="rating-stars">
+                    <span class="star" data-rating="1">★</span>
+                    <span class="star" data-rating="2">★</span>
+                    <span class="star" data-rating="3">★</span>
+                    <span class="star" data-rating="4">★</span>
+                    <span class="star" data-rating="5">★</span>
+                </div>
+                <input type="hidden" id="ratingValue" value="0">
+                <input type="hidden" id="ratingBookingId">
+                <div class="form-group">
+                    <label>Comment (Optional)</label>
+                    <textarea id="ratingComment" placeholder="Share your experience..." rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('ratingModal')">Skip</button>
+                <button class="btn btn-primary" onclick="submitRating()">Submit Rating</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seat Lock Timer -->
+    <div class="seat-lock-timer" id="seatLockTimer" style="display: none;">
+        <div class="timer-content">
+            <span class="timer-icon">⏱️</span>
+            <span class="timer-text">Seat reserved for <span id="timerSeconds">90</span>s</span>
+            <button class="btn btn-primary btn-sm" onclick="confirmBookingFromTimer()">Confirm Now</button>
+            <button class="btn btn-outline btn-sm" onclick="cancelSeatLock()">Cancel</button>
+        </div>
+    </div>
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

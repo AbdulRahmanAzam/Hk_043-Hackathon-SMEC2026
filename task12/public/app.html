@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="UniRide Karachi - University Carpool Platform. Share rides, save money, reduce carbon emissions.">
+    <title>UniRide Karachi - Smart University Carpooling</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Mapbox -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/enhanced.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+</head>
+<body>
+    <!-- Enhanced Navigation -->
+    <nav class="navbar-enhanced" id="navbar">
+        <div class="nav-wrapper">
+            <a href="#" class="nav-brand" onclick="showPage('home')">
+                <div class="nav-brand-logo">🚗</div>
+                <div class="nav-brand-text">UniRide<span>KHI</span></div>
+            </a>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="#" class="nav-item" onclick="showPage('search')" data-page="search">
+                    <span class="nav-item-icon">🔍</span>
+                    <span>Find Ride</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('post-ride')" data-page="post-ride" id="postRideNav" style="display: none;">
+                    <span class="nav-item-icon">🚘</span>
+                    <span>Offer Ride</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('my-rides')" data-page="my-rides" id="myRidesNav" style="display: none;">
+                    <span class="nav-item-icon">📋</span>
+                    <span>My Rides</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('bookings')" data-page="bookings" id="bookingsNav" style="display: none;">
+                    <span class="nav-item-icon">🎫</span>
+                    <span>Bookings</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('dashboard')" data-page="dashboard" id="dashboardNav" style="display: none;">
+                    <span class="nav-item-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            
+            <div class="nav-actions">
+                <div id="authButtons">
+                    <button class="btn-enhanced btn-outline-enhanced" onclick="showPage('login')">Login</button>
+                    <button class="btn-enhanced btn-primary-enhanced" onclick="showPage('signup')">Sign Up</button>
+                </div>
+                <div id="userMenu" style="display: none;">
+                    <button class="btn-enhanced btn-outline-enhanced" id="userMenuBtn" onclick="toggleUserDropdown()">
+                        <span id="userAvatar" style="font-size: 1.25rem;">👤</span>
+                        <span id="userNameDisplay">User</span>
+                        <span>▼</span>
+                    </button>
+                    <div class="dropdown-menu-enhanced" id="userDropdown" style="display: none;">
+                        <a href="#" onclick="showPage('profile')">👤 Profile</a>
+                        <a href="#" onclick="showPage('dashboard')">📊 Dashboard</a>
+                        <hr>
+                        <a href="#" onclick="logout()" style="color: var(--danger);">🚪 Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main id="mainContent">
+        <!-- ============================================= -->
+        <!-- HOME PAGE -->
+        <!-- ============================================= -->
+        <section class="page active" id="homePage">
+            <!-- Hero Section -->
+            <div class="hero-enhanced">
+                <div class="hero-particles" id="heroParticles"></div>
+                
+                <div class="hero-container">
+                    <div class="hero-content">
+                        <div class="hero-badge">
+                            <span class="hero-badge-dot"></span>
+                            <span>🌱 Eco-Friendly Commuting</span>
+                        </div>
+                        
+                        <h1 class="hero-title">
+                            Share Your Ride,<br>
+                            <span class="hero-title-highlight">Save the Planet</span>
+                        </h1>
+                        
+                        <p class="hero-description">
+                            The exclusive carpool platform for Karachi university students. 
+                            Safe, affordable, and eco-friendly commuting with real-time tracking and smart matching.
+                        </p>
+                        
+                        <div class="hero-cta-group">
+                            <button class="btn-enhanced btn-white-enhanced btn-lg-enhanced" onclick="showPage('search')">
+                                🔍 Find a Ride
+                            </button>
+                            <button class="btn-enhanced btn-glass btn-lg-enhanced" onclick="handleOfferRide()">
+                                🚗 Offer a Ride
+                            </button>
+                        </div>
+                        
+                        <div class="hero-stats">
+                            <div class="hero-stat">
+                                <span class="hero-stat-value">10+</span>
+                                <span class="hero-stat-label">Universities</span>
+                            </div>
+                            <div class="hero-stat">
+                                <span class="hero-stat-value">500+</span>
+                                <span class="hero-stat-label">Active Rides</span>
+                            </div>
+                            <div class="hero-stat">
+                                <span class="hero-stat-value">2.5T</span>
+                                <span class="hero-stat-label">CO₂ Saved</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Search Card -->
+                    <div class="hero-search-card">
+                        <h3 class="hero-search-title">Quick Search</h3>
+                        <p class="hero-search-subtitle">Find your perfect ride in seconds</p>
+                        
+                        <div class="search-tab-group">
+                            <button class="search-tab active" onclick="setSearchMode('find')">
+                                🔍 Find Ride
+                            </button>
+                            <button class="search-tab" onclick="setSearchMode('offer')">
+                                🚗 Offer Ride
+                            </button>
+                        </div>
+                        
+                        <form id="quickSearchForm" onsubmit="handleQuickSearch(event)">
+                            <div class="location-input-enhanced">
+                                <div class="input-group-enhanced">
+                                    <label>Pickup Location</label>
+                                    <div class="input-with-icon">
+                                        <span class="location-dot start"></span>
+                                        <input type="text" class="input-enhanced" id="heroPickup" placeholder="Where are you starting from?" style="padding-left: 40px;">
+                                    </div>
+                                </div>
+                                
+                                <div class="route-line"></div>
+                                
+                                <div class="input-group-enhanced">
+                                    <label>Drop Location</label>
+                                    <div class="input-with-icon">
+                                        <span class="location-dot end"></span>
+                                        <input type="text" class="input-enhanced" id="heroDrop" placeholder="Where are you going?" style="padding-left: 40px;">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group-enhanced" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                                <div>
+                                    <label>Date</label>
+                                    <input type="date" class="input-enhanced" id="heroDate">
+                                </div>
+                                <div>
+                                    <label>Time</label>
+                                    <input type="time" class="input-enhanced" id="heroTime">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn-enhanced btn-primary-enhanced btn-lg-enhanced" style="width: 100%;">
+                                🔍 Search Rides
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features Section -->
+            <section class="features-section-enhanced">
+                <div class="section-header">
+                    <span class="section-badge">✨ Why Choose Us</span>
+                    <h2 class="section-title-enhanced">Smart Carpooling for Smart Students</h2>
+                    <p class="section-description">
+                        Experience the future of university commuting with our intelligent matching system, 
+                        real-time tracking, and eco-friendly approach.
+                    </p>
+                </div>
+                
+                <div class="features-grid-enhanced">
+                    <div class="feature-card-enhanced">
+                        <div class="feature-icon-enhanced">🎓</div>
+                        <h3>University Verified</h3>
+                        <p>Only students with valid university emails can join. Your safety is our top priority with verified community members.</p>
+                    </div>
+                    
+                    <div class="feature-card-enhanced">
+                        <div class="feature-icon-enhanced">🧠</div>
+                        <h3>Smart Matching</h3>
+                        <p>AI-powered matching based on route, schedule, department, and preferences for the perfect ride companion.</p>
+                    </div>
+                    
+                    <div class="feature-card-enhanced">
+                        <div class="feature-icon-enhanced">💰</div>
+                        <h3>Split Fuel Costs</h3>
+                        <p>Share rides, share costs. Save up to 70% on your daily commute expenses with fair cost splitting.</p>
+                    </div>
+                    
+                    <div class="feature-card-enhanced">
+                        <div class="feature-icon-enhanced">🗺️</div>
+                        <h3>Live Route Tracking</h3>
+                        <p>Real-time map integration with accurate ETAs for Karachi roads. Know exactly where your ride is.</p>
+                    </div>
+                    
+                    <div class="feature-card-enhanced">
+                        <div class="feature-icon-enhanced">🌱</div>
+                        <h3>Carbon Tracking</h3>
+                        <p>Track your environmental impact. See how much CO₂ you've saved with every shared ride.</p>
+                    </div>
+                    
+                    <div class="feature-card-enhanced">
+                        <div class="feature-icon-enhanced">📱</div>
+                        <h3>WhatsApp Integration</h3>
+                        <p>Book rides directly via WhatsApp! Send "find ride" and get instant matches on your phone.</p>
+                    </div>
+                    
+                    <div class="feature-card-enhanced">
+                        <div class="feature-icon-enhanced">⭐</div>
+                        <h3>Trusted Ratings</h3>
+                        <p>Build trust with our rating system. See reviews and ratings before you book or accept a ride.</p>
+                    </div>
+                    
+                    <div class="feature-card-enhanced">
+                        <div class="feature-icon-enhanced">🆘</div>
+                        <h3>SOS Safety</h3>
+                        <p>One-tap emergency alerts with live location sharing. Your safety is always just a button away.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Universities Section -->
+            <section class="universities-section-enhanced" style="padding: var(--space-16) var(--space-6); background: var(--gray-50);">
+                <div class="section-header">
+                    <span class="section-badge">🏛️ Partner Universities</span>
+                    <h2 class="section-title-enhanced">Connecting Karachi's Best</h2>
+                </div>
+                
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-4); max-width: 900px; margin: 0 auto;">
+                    <span class="university-tag-enhanced">FAST-NUCES</span>
+                    <span class="university-tag-enhanced">IBA Karachi</span>
+                    <span class="university-tag-enhanced">NUST</span>
+                    <span class="university-tag-enhanced">LUMS</span>
+                    <span class="university-tag-enhanced">SZABIST</span>
+                    <span class="university-tag-enhanced">Bahria University</span>
+                    <span class="university-tag-enhanced">NED University</span>
+                    <span class="university-tag-enhanced">University of Karachi</span>
+                    <span class="university-tag-enhanced">Aga Khan University</span>
+                    <span class="university-tag-enhanced">Habib University</span>
+                </div>
+            </section>
+
+            <style>
+                .university-tag-enhanced {
+                    background: var(--gradient-primary);
+                    color: white;
+                    padding: var(--space-3) var(--space-5);
+                    border-radius: var(--radius-full);
+                    font-size: 0.9375rem;
+                    font-weight: 600;
+                    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+                    transition: transform var(--transition-spring);
+                }
+                .university-tag-enhanced:hover {
+                    transform: translateY(-3px) scale(1.05);
+                }
+            </style>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- SEARCH / FIND RIDES PAGE -->
+        <!-- ============================================= -->
+        <section class="page" id="searchPage">
+            <div class="search-page-enhanced">
+                <!-- Sidebar -->
+                <div class="search-sidebar-enhanced">
+                    <div class="sidebar-header">
+                        <h2>🔍 Find a Ride</h2>
+                        <p>Search for available rides near you</p>
+                    </div>
+                    
+                    <div class="search-form-enhanced">
+                        <div class="location-input-enhanced">
+                            <div class="input-group-enhanced">
+                                <label>Pickup Location</label>
+                                <div class="input-with-icon">
+                                    <span class="location-dot start"></span>
+                                    <input type="text" class="input-enhanced" id="searchPickup" placeholder="Click map or type..." style="padding-left: 40px;" onclick="setMapClickMode('pickup')">
+                                </div>
+                                <input type="hidden" id="searchPickupLat">
+                                <input type="hidden" id="searchPickupLng">
+                            </div>
+                            
+                            <div class="route-line"></div>
+                            
+                            <div class="input-group-enhanced">
+                                <label>Drop Location</label>
+                                <div class="input-with-icon">
+                                    <span class="location-dot end"></span>
+                                    <input type="text" class="input-enhanced" id="searchDrop" placeholder="Click map or type..." style="padding-left: 40px;" onclick="setMapClickMode('drop')">
+                                </div>
+                                <input type="hidden" id="searchDropLat">
+                                <input type="hidden" id="searchDropLng">
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                            <div class="input-group-enhanced">
+                                <label>Date</label>
+                                <input type="date" class="input-enhanced" id="searchDate">
+                            </div>
+                            <div class="input-group-enhanced">
+                                <label>Time</label>
+                                <input type="time" class="input-enhanced" id="searchTime">
+                            </div>
+                        </div>
+                        
+                        <div class="input-group-enhanced">
+                            <label>Search Radius: <strong id="radiusDisplay">3</strong> km</label>
+                            <input type="range" id="searchRadius" min="1" max="10" value="3" class="input-enhanced" 
+                                   oninput="document.getElementById('radiusDisplay').textContent = this.value">
+                        </div>
+                        
+                        <button class="btn-enhanced btn-primary-enhanced" style="width: 100%; margin-bottom: var(--space-3);" onclick="performSearch()">
+                            🔍 Search Rides
+                        </button>
+                        
+                        <button class="btn-enhanced btn-outline-enhanced" style="width: 100%;" onclick="clearSearchForm()">
+                            🔄 Clear Filters
+                        </button>
+                    </div>
+                    
+                    <!-- Search Results -->
+                    <div class="search-results-container">
+                        <div class="results-header-enhanced">
+                            <span class="results-count-enhanced" id="resultsCount"><strong>0</strong> rides found</span>
+                            <div class="results-sort">
+                                <span>Sort by:</span>
+                                <select id="sortSelect" onchange="sortResults()">
+                                    <option value="match">Best Match</option>
+                                    <option value="time">Departure Time</option>
+                                    <option value="price">Price</option>
+                                    <option value="distance">Distance</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="results-list-enhanced" id="searchResultsList">
+                            <div style="text-align: center; padding: var(--space-8); color: var(--gray-500);">
+                                <div style="font-size: 3rem; margin-bottom: var(--space-4);">🔍</div>
+                                <p style="font-size: 1.125rem; font-weight: 600;">Search for rides</p>
+                                <p style="font-size: 0.875rem;">Enter your route to find available rides</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Map -->
+                <div class="map-container-enhanced" id="searchMapContainer">
+                    <div id="searchMap" style="width: 100%; height: 100%;"></div>
+                    
+                    <div class="map-controls">
+                        <button class="map-control-btn" onclick="getCurrentLocation()" title="My Location">📍</button>
+                        <button class="map-control-btn" onclick="resetMapView()" title="Reset View">🔄</button>
+                    </div>
+                    
+                    <div class="map-legend-enhanced">
+                        <div class="legend-item-enhanced">
+                            <span class="legend-marker pickup"></span>
+                            <span>Pickup</span>
+                        </div>
+                        <div class="legend-item-enhanced">
+                            <span class="legend-marker drop"></span>
+                            <span>Drop</span>
+                        </div>
+                        <div class="legend-item-enhanced">
+                            <span class="legend-marker ride"></span>
+                            <span>Available Rides</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- POST/OFFER RIDE PAGE -->
+        <!-- ============================================= -->
+        <section class="page" id="postRidePage">
+            <div class="post-ride-page-enhanced">
+                <!-- Form -->
+                <div class="post-form-container-enhanced">
+                    <div class="post-form-header">
+                        <h2>🚗 Offer a Ride</h2>
+                        <p>Share your journey with fellow students and earn while commuting</p>
+                    </div>
+                    
+                    <form id="postRideForm" onsubmit="handlePostRide(event)">
+                        <!-- Route Section -->
+                        <div class="form-section-enhanced">
+                            <div class="form-section-title-enhanced">
+                                <div class="form-section-icon">📍</div>
+                                <span>Route Details</span>
+                            </div>
+                            
+                            <div class="location-input-enhanced">
+                                <div class="input-group-enhanced">
+                                    <label>Pickup Location *</label>
+                                    <div class="input-with-icon">
+                                        <span class="location-dot start"></span>
+                                        <input type="text" class="input-enhanced" id="postPickup" placeholder="Click on map to select" style="padding-left: 40px;" onclick="setPostMapMode('pickup')" readonly required>
+                                    </div>
+                                    <input type="hidden" id="postPickupLat" required>
+                                    <input type="hidden" id="postPickupLng" required>
+                                </div>
+                                
+                                <div class="route-line"></div>
+                                
+                                <div class="input-group-enhanced">
+                                    <label>Drop Location *</label>
+                                    <div class="input-with-icon">
+                                        <span class="location-dot end"></span>
+                                        <input type="text" class="input-enhanced" id="postDrop" placeholder="Click on map to select" style="padding-left: 40px;" onclick="setPostMapMode('drop')" readonly required>
+                                    </div>
+                                    <input type="hidden" id="postDropLat" required>
+                                    <input type="hidden" id="postDropLng" required>
+                                </div>
+                            </div>
+                            
+                            <!-- Route Summary -->
+                            <div class="route-summary-card" id="routeSummary" style="display: none;">
+                                <div class="route-summary-grid">
+                                    <div class="route-summary-item">
+                                        <span class="route-summary-value" id="routeDistance">0</span>
+                                        <span class="route-summary-label">km distance</span>
+                                    </div>
+                                    <div class="route-summary-item">
+                                        <span class="route-summary-value" id="routeDuration">0</span>
+                                        <span class="route-summary-label">min ETA</span>
+                                    </div>
+                                    <div class="route-summary-item">
+                                        <span class="route-summary-value" id="routeCO2">0</span>
+                                        <span class="route-summary-label">kg CO₂ saved</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Schedule Section -->
+                        <div class="form-section-enhanced">
+                            <div class="form-section-title-enhanced">
+                                <div class="form-section-icon">📅</div>
+                                <span>Schedule</span>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                                <div class="input-group-enhanced">
+                                    <label>Departure Date *</label>
+                                    <input type="date" class="input-enhanced" id="postDate" required>
+                                </div>
+                                <div class="input-group-enhanced">
+                                    <label>Departure Time *</label>
+                                    <input type="time" class="input-enhanced" id="postTime" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Seats & Pricing -->
+                        <div class="form-section-enhanced">
+                            <div class="form-section-title-enhanced">
+                                <div class="form-section-icon">💺</div>
+                                <span>Seats & Pricing</span>
+                            </div>
+                            
+                            <div class="input-group-enhanced">
+                                <label>Available Seats *</label>
+                                <div class="seats-selector" id="seatsSelector">
+                                    <div class="seat-option" data-seats="1" onclick="selectSeats(1)">
+                                        <span class="seat-option-number">1</span>
+                                        <span class="seat-option-label">seat</span>
+                                    </div>
+                                    <div class="seat-option" data-seats="2" onclick="selectSeats(2)">
+                                        <span class="seat-option-number">2</span>
+                                        <span class="seat-option-label">seats</span>
+                                    </div>
+                                    <div class="seat-option selected" data-seats="3" onclick="selectSeats(3)">
+                                        <span class="seat-option-number">3</span>
+                                        <span class="seat-option-label">seats</span>
+                                    </div>
+                                    <div class="seat-option" data-seats="4" onclick="selectSeats(4)">
+                                        <span class="seat-option-number">4</span>
+                                        <span class="seat-option-label">seats</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="postSeats" value="3">
+                            </div>
+                            
+                            <div class="input-group-enhanced">
+                                <label>Fuel Contribution (PKR per seat) - Optional</label>
+                                <input type="number" class="input-enhanced" id="postPrice" placeholder="e.g., 150" min="0" max="5000">
+                                <small style="color: var(--gray-500); font-size: 0.8125rem;">Leave empty for free rides</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Rules Section -->
+                        <div class="form-section-enhanced">
+                            <div class="form-section-title-enhanced">
+                                <div class="form-section-icon">📝</div>
+                                <span>Ride Rules (Optional)</span>
+                            </div>
+                            
+                            <div class="input-group-enhanced">
+                                <textarea class="input-enhanced" id="postRules" rows="3" placeholder="e.g., No smoking, Music allowed, Ladies only..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden fields -->
+                        <input type="hidden" id="postDistanceKm">
+                        <input type="hidden" id="postDurationMin">
+                        <input type="hidden" id="postRoutePolyline">
+                        
+                        <div class="form-error" id="postError" style="display: none;"></div>
+                        
+                        <button type="submit" class="btn-enhanced btn-primary-enhanced btn-lg-enhanced" style="width: 100%;" id="postSubmitBtn">
+                            🚀 Post Ride
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Map -->
+                <div class="map-container-enhanced" id="postMapContainer">
+                    <div id="postMap" style="width: 100%; height: 100%;"></div>
+                    
+                    <div style="position: absolute; bottom: var(--space-6); left: 50%; transform: translateX(-50%); background: var(--white); padding: var(--space-3) var(--space-5); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); font-size: 0.9375rem;">
+                        👆 Click on the map to set your <strong id="postMapMode">pickup</strong> location
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- MY RIDES PAGE (Driver View) -->
+        <!-- ============================================= -->
+        <section class="page" id="myRidesPage">
+            <div class="dashboard-page">
+                <div class="dashboard-header">
+                    <div>
+                        <h1 class="dashboard-title">📋 My Posted Rides</h1>
+                        <p class="dashboard-subtitle">Manage your posted rides and view passenger bookings</p>
+                    </div>
+                    <button class="btn-enhanced btn-primary-enhanced" onclick="showPage('post-ride')">
+                        ➕ Post New Ride
+                    </button>
+                </div>
+                
+                <div class="tab-nav-enhanced">
+                    <button class="tab-btn-enhanced active" onclick="loadMyRides('active')" data-tab="active">🟢 Active</button>
+                    <button class="tab-btn-enhanced" onclick="loadMyRides('completed')" data-tab="completed">✅ Completed</button>
+                    <button class="tab-btn-enhanced" onclick="loadMyRides('cancelled')" data-tab="cancelled">❌ Cancelled</button>
+                </div>
+                
+                <div id="myRidesList" class="results-list-enhanced">
+                    <div style="text-align: center; padding: var(--space-8);">
+                        <div class="loading-spinner"></div>
+                        <p>Loading your rides...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- BOOKINGS PAGE (Rider View) -->
+        <!-- ============================================= -->
+        <section class="page" id="bookingsPage">
+            <div class="dashboard-page">
+                <div class="dashboard-header">
+                    <div>
+                        <h1 class="dashboard-title">🎫 My Bookings</h1>
+                        <p class="dashboard-subtitle">View and manage your ride bookings</p>
+                    </div>
+                    <button class="btn-enhanced btn-primary-enhanced" onclick="showPage('search')">
+                        🔍 Find New Ride
+                    </button>
+                </div>
+                
+                <div class="tab-nav-enhanced">
+                    <button class="tab-btn-enhanced active" onclick="loadMyBookings('upcoming')" data-tab="upcoming">📅 Upcoming</button>
+                    <button class="tab-btn-enhanced" onclick="loadMyBookings('past')" data-tab="past">📜 Past</button>
+                </div>
+                
+                <div id="myBookingsList" class="results-list-enhanced">
+                    <div style="text-align: center; padding: var(--space-8);">
+                        <div class="loading-spinner"></div>
+                        <p>Loading your bookings...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- DASHBOARD PAGE -->
+        <!-- ============================================= -->
+        <section class="page" id="dashboardPage">
+            <div class="dashboard-page">
+                <div class="dashboard-header">
+                    <div>
+                        <h1 class="dashboard-title">📊 Your Dashboard</h1>
+                        <p class="dashboard-subtitle">Track your ride history, carbon savings, and achievements</p>
+                    </div>
+                </div>
+                
+                <!-- Carbon Impact Card -->
+                <div class="carbon-impact-card">
+                    <div class="carbon-header">
+                        <div>
+                            <h3 class="carbon-title">🌍 Your Environmental Impact</h3>
+                            <p class="carbon-subtitle">Every ride counts towards a greener Karachi</p>
+                        </div>
+                        <span class="carbon-badge">🏆 Eco Champion</span>
+                    </div>
+                    
+                    <div class="carbon-stats">
+                        <div class="carbon-stat">
+                            <div class="carbon-stat-icon">🌱</div>
+                            <span class="carbon-stat-value" id="dashCO2Saved">0</span>
+                            <span class="carbon-stat-label">kg CO₂ Saved</span>
+                        </div>
+                        <div class="carbon-stat">
+                            <div class="carbon-stat-icon">🌳</div>
+                            <span class="carbon-stat-value" id="dashTreesEquiv">0</span>
+                            <span class="carbon-stat-label">Trees Equivalent</span>
+                        </div>
+                        <div class="carbon-stat">
+                            <div class="carbon-stat-icon">🚗</div>
+                            <span class="carbon-stat-value" id="dashRidesShared">0</span>
+                            <span class="carbon-stat-label">Rides Shared</span>
+                        </div>
+                        <div class="carbon-stat">
+                            <div class="carbon-stat-icon">💰</div>
+                            <span class="carbon-stat-value" id="dashMoneySaved">0</span>
+                            <span class="carbon-stat-label">PKR Saved</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card-enhanced">
+                        <div class="stat-card-header">
+                            <div class="stat-icon rides">🚗</div>
+                            <span class="stat-trend up">+12%</span>
+                        </div>
+                        <span class="stat-value-enhanced" id="dashTotalRides">0</span>
+                        <span class="stat-label-enhanced">Total Rides</span>
+                    </div>
+                    
+                    <div class="stat-card-enhanced">
+                        <div class="stat-card-header">
+                            <div class="stat-icon rating">⭐</div>
+                        </div>
+                        <span class="stat-value-enhanced" id="dashRating">-</span>
+                        <span class="stat-label-enhanced">Average Rating</span>
+                    </div>
+                    
+                    <div class="stat-card-enhanced">
+                        <div class="stat-card-header">
+                            <div class="stat-icon co2">🔥</div>
+                        </div>
+                        <span class="stat-value-enhanced" id="dashStreak">0</span>
+                        <span class="stat-label-enhanced">Day Streak</span>
+                    </div>
+                    
+                    <div class="stat-card-enhanced">
+                        <div class="stat-card-header">
+                            <div class="stat-icon savings">📍</div>
+                        </div>
+                        <span class="stat-value-enhanced" id="dashDistance">0</span>
+                        <span class="stat-label-enhanced">km Traveled</span>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <h3 style="font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-4);">📜 Recent Activity</h3>
+                
+                <div class="history-list-enhanced" id="recentActivityList">
+                    <div style="text-align: center; padding: var(--space-8);">
+                        <div class="loading-spinner"></div>
+                        <p>Loading activity...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- RIDE DETAILS PAGE -->
+        <!-- ============================================= -->
+        <section class="page" id="rideDetailsPage">
+            <div class="post-ride-page-enhanced">
+                <div class="post-form-container-enhanced" id="rideDetailsContent">
+                    <div style="text-align: center; padding: var(--space-8);">
+                        <div class="loading-spinner"></div>
+                        <p>Loading ride details...</p>
+                    </div>
+                </div>
+                
+                <div class="map-container-enhanced" id="rideDetailsMapContainer">
+                    <div id="rideDetailsMap" style="width: 100%; height: 100%;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- LOGIN PAGE -->
+        <!-- ============================================= -->
+        <section class="page" id="loginPage">
+            <div style="min-height: calc(100vh - 72px); display: flex; align-items: center; justify-content: center; padding: var(--space-8); margin-top: 72px; background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-50) 100%);">
+                <div style="background: var(--white); padding: var(--space-8); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xl); width: 100%; max-width: 420px;">
+                    <div style="text-align: center; margin-bottom: var(--space-8);">
+                        <div style="font-size: 3rem; margin-bottom: var(--space-4);">👋</div>
+                        <h2 style="font-family: var(--font-display); font-size: 1.75rem; font-weight: 700; color: var(--gray-900);">Welcome Back</h2>
+                        <p style="color: var(--gray-500);">Login to continue your journey</p>
+                    </div>
+                    
+                    <form id="loginForm" onsubmit="handleLogin(event)">
+                        <div class="input-group-enhanced">
+                            <label>University Email</label>
+                            <input type="email" class="input-enhanced" id="loginEmail" placeholder="your.name@nu.edu.pk" required>
+                        </div>
+                        
+                        <div class="input-group-enhanced">
+                            <label>Password</label>
+                            <input type="password" class="input-enhanced" id="loginPassword" placeholder="Enter your password" required>
+                        </div>
+                        
+                        <div class="form-error" id="loginError" style="display: none;"></div>
+                        
+                        <button type="submit" class="btn-enhanced btn-primary-enhanced btn-lg-enhanced" style="width: 100%;" id="loginSubmitBtn">
+                            Login
+                        </button>
+                    </form>
+                    
+                    <p style="text-align: center; margin-top: var(--space-6); color: var(--gray-500);">
+                        Don't have an account? <a href="#" onclick="showPage('signup')" style="color: var(--primary); font-weight: 600;">Sign up</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- SIGNUP PAGE -->
+        <!-- ============================================= -->
+        <section class="page" id="signupPage">
+            <div style="min-height: calc(100vh - 72px); display: flex; align-items: center; justify-content: center; padding: var(--space-8); margin-top: 72px; background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-50) 100%);">
+                <div style="background: var(--white); padding: var(--space-8); border-radius: var(--radius-2xl); box-shadow: var(--shadow-xl); width: 100%; max-width: 600px;">
+                    <div style="text-align: center; margin-bottom: var(--space-8);">
+                        <div style="font-size: 3rem; margin-bottom: var(--space-4);">🚀</div>
+                        <h2 style="font-family: var(--font-display); font-size: 1.75rem; font-weight: 700; color: var(--gray-900);">Join UniRide</h2>
+                        <p style="color: var(--gray-500);">Create your account with your university email</p>
+                    </div>
+                    
+                    <form id="signupForm" onsubmit="handleSignup(event)">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                            <div class="input-group-enhanced">
+                                <label>Full Name *</label>
+                                <input type="text" class="input-enhanced" id="signupName" placeholder="Muhammad Ali" required>
+                            </div>
+                            <div class="input-group-enhanced">
+                                <label>University Email *</label>
+                                <input type="email" class="input-enhanced" id="signupEmail" placeholder="name@nu.edu.pk" required>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                            <div class="input-group-enhanced">
+                                <label>Password *</label>
+                                <input type="password" class="input-enhanced" id="signupPassword" placeholder="Min 8 chars" required minlength="8">
+                            </div>
+                            <div class="input-group-enhanced">
+                                <label>Confirm Password *</label>
+                                <input type="password" class="input-enhanced" id="signupConfirmPassword" placeholder="Confirm password" required>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                            <div class="input-group-enhanced">
+                                <label>Department</label>
+                                <input type="text" class="input-enhanced" id="signupDepartment" placeholder="Computer Science">
+                            </div>
+                            <div class="input-group-enhanced">
+                                <label>Semester</label>
+                                <select class="input-enhanced" id="signupSemester">
+                                    <option value="">Select</option>
+                                    <option value="1">1st</option>
+                                    <option value="2">2nd</option>
+                                    <option value="3">3rd</option>
+                                    <option value="4">4th</option>
+                                    <option value="5">5th</option>
+                                    <option value="6">6th</option>
+                                    <option value="7">7th</option>
+                                    <option value="8">8th</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                            <div class="input-group-enhanced">
+                                <label>Gender</label>
+                                <select class="input-enhanced" id="signupGender">
+                                    <option value="prefer_not_to_say">Prefer not to say</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <div class="input-group-enhanced">
+                                <label>I want to *</label>
+                                <select class="input-enhanced" id="signupRole" required>
+                                    <option value="rider">Find rides (Rider)</option>
+                                    <option value="driver">Offer rides (Driver)</option>
+                                    <option value="both">Both</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group-enhanced">
+                            <label>Phone Number (Optional)</label>
+                            <input type="tel" class="input-enhanced" id="signupPhone" placeholder="03XX-XXXXXXX">
+                        </div>
+                        
+                        <div class="form-error" id="signupError" style="display: none;"></div>
+                        
+                        <button type="submit" class="btn-enhanced btn-primary-enhanced btn-lg-enhanced" style="width: 100%;" id="signupSubmitBtn">
+                            Create Account
+                        </button>
+                    </form>
+                    
+                    <p style="text-align: center; margin-top: var(--space-6); color: var(--gray-500);">
+                        Already have an account? <a href="#" onclick="showPage('login')" style="color: var(--primary); font-weight: 600;">Login</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================= -->
+        <!-- PROFILE PAGE -->
+        <!-- ============================================= -->
+        <section class="page" id="profilePage">
+            <div class="dashboard-page">
+                <div style="max-width: 800px; margin: 0 auto;">
+                    <div style="text-align: center; margin-bottom: var(--space-10);">
+                        <div id="profileAvatarLarge" style="width: 120px; height: 120px; background: var(--gradient-primary); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: 700; margin: 0 auto var(--space-4); box-shadow: var(--shadow-lg);">U</div>
+                        <h2 id="profileNameDisplay" style="font-family: var(--font-display); font-size: 1.75rem; font-weight: 700;">Loading...</h2>
+                        <p id="profileUniversityDisplay" style="color: var(--gray-500);">Loading...</p>
+                        <div style="display: flex; justify-content: center; gap: var(--space-2); margin-top: var(--space-3);">
+                            <span id="profileRatingDisplay" style="color: var(--accent); font-size: 1.25rem;">★★★★★</span>
+                            <span id="profileRatingCount" style="color: var(--gray-500);">(0 ratings)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: var(--space-8);">
+                        <div class="stat-card-enhanced" style="text-align: center;">
+                            <span class="stat-value-enhanced" id="profileRidesCompleted">0</span>
+                            <span class="stat-label-enhanced">Rides Completed</span>
+                        </div>
+                        <div class="stat-card-enhanced" style="text-align: center;">
+                            <span class="stat-value-enhanced" id="profileRidesPosted">0</span>
+                            <span class="stat-label-enhanced">Rides Posted</span>
+                        </div>
+                        <div class="stat-card-enhanced" style="text-align: center;">
+                            <span class="stat-value-enhanced" id="profileRidesTaken">0</span>
+                            <span class="stat-label-enhanced">Rides Taken</span>
+                        </div>
+                        <div class="stat-card-enhanced" style="text-align: center; border-color: var(--danger-light);">
+                            <span class="stat-value-enhanced" style="color: var(--danger);" id="profileNoShows">0</span>
+                            <span class="stat-label-enhanced">No Shows</span>
+                        </div>
+                    </div>
+                    
+                    <div style="background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-2xl); padding: var(--space-8);">
+                        <h3 style="font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-6);">Edit Profile</h3>
+                        
+                        <form id="profileForm" onsubmit="handleProfileUpdate(event)">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                                <div class="input-group-enhanced">
+                                    <label>Name</label>
+                                    <input type="text" class="input-enhanced" id="profileEditName">
+                                </div>
+                                <div class="input-group-enhanced">
+                                    <label>Department</label>
+                                    <input type="text" class="input-enhanced" id="profileEditDept">
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                                <div class="input-group-enhanced">
+                                    <label>Semester</label>
+                                    <select class="input-enhanced" id="profileEditSemester">
+                                        <option value="">Select</option>
+                                        <option value="1">1st</option>
+                                        <option value="2">2nd</option>
+                                        <option value="3">3rd</option>
+                                        <option value="4">4th</option>
+                                        <option value="5">5th</option>
+                                        <option value="6">6th</option>
+                                        <option value="7">7th</option>
+                                        <option value="8">8th</option>
+                                    </select>
+                                </div>
+                                <div class="input-group-enhanced">
+                                    <label>Phone</label>
+                                    <input type="tel" class="input-enhanced" id="profileEditPhone">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group-enhanced">
+                                <label>Role</label>
+                                <select class="input-enhanced" id="profileEditRole">
+                                    <option value="rider">Rider</option>
+                                    <option value="driver">Driver</option>
+                                    <option value="both">Both</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn-enhanced btn-primary-enhanced" style="width: 100%;">
+                                Save Changes
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ============================================= -->
+    <!-- BOOKING MODAL -->
+    <!-- ============================================= -->
+    <div class="modal-enhanced" id="bookingModal">
+        <div class="modal-backdrop" onclick="closeModal('bookingModal')"></div>
+        <div class="modal-content-enhanced">
+            <div class="modal-header-enhanced">
+                <h3>🎫 Confirm Booking</h3>
+                <button class="modal-close-enhanced" onclick="closeModal('bookingModal')">×</button>
+            </div>
+            <div class="modal-body-enhanced" id="bookingModalBody">
+                <!-- Timer -->
+                <div class="booking-timer" id="bookingTimer">
+                    <div class="timer-circle">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="timer-circle-bg" cx="50" cy="50" r="45"/>
+                            <circle class="timer-circle-progress" cx="50" cy="50" r="45" id="timerProgress"/>
+                        </svg>
+                        <span class="timer-value" id="timerValue">90</span>
+                    </div>
+                    <p class="timer-label">Seat reserved for you. Confirm to complete booking.</p>
+                </div>
+                
+                <!-- Ride Summary -->
+                <div id="bookingRideSummary"></div>
+            </div>
+            <div class="modal-footer-enhanced">
+                <button class="btn-enhanced btn-outline-enhanced" onclick="cancelSeatLock()" style="flex: 1;">Cancel</button>
+                <button class="btn-enhanced btn-primary-enhanced" onclick="confirmBooking()" style="flex: 2;" id="confirmBookingBtn">
+                    ✅ Confirm Booking
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================= -->
+    <!-- RATING MODAL -->
+    <!-- ============================================= -->
+    <div class="modal-enhanced" id="ratingModal">
+        <div class="modal-backdrop" onclick="closeModal('ratingModal')"></div>
+        <div class="modal-content-enhanced">
+            <div class="modal-header-enhanced">
+                <h3>⭐ Rate Your Ride</h3>
+                <button class="modal-close-enhanced" onclick="closeModal('ratingModal')">×</button>
+            </div>
+            <div class="modal-body-enhanced">
+                <div style="text-align: center; margin-bottom: var(--space-6);">
+                    <div class="rating-stars-enhanced" id="ratingStars">
+                        <span class="star-btn" data-rating="1" onclick="selectRating(1)">★</span>
+                        <span class="star-btn" data-rating="2" onclick="selectRating(2)">★</span>
+                        <span class="star-btn" data-rating="3" onclick="selectRating(3)">★</span>
+                        <span class="star-btn" data-rating="4" onclick="selectRating(4)">★</span>
+                        <span class="star-btn" data-rating="5" onclick="selectRating(5)">★</span>
+                    </div>
+                    <input type="hidden" id="ratingValue" value="0">
+                    <input type="hidden" id="ratingBookingId">
+                </div>
+                
+                <div class="input-group-enhanced">
+                    <label>Comment (Optional)</label>
+                    <textarea class="input-enhanced" id="ratingComment" rows="3" placeholder="Share your experience..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer-enhanced">
+                <button class="btn-enhanced btn-outline-enhanced" onclick="closeModal('ratingModal')">Skip</button>
+                <button class="btn-enhanced btn-primary-enhanced" onclick="submitRating()">Submit Rating</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .rating-stars-enhanced {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-2);
+            font-size: 2.5rem;
+        }
+        .rating-stars-enhanced .star-btn {
+            color: var(--gray-300);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+        .rating-stars-enhanced .star-btn:hover,
+        .rating-stars-enhanced .star-btn.active {
+            color: var(--accent);
+            transform: scale(1.2);
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto var(--space-4);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .form-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-4);
+            font-size: 0.875rem;
+        }
+    </style>
+
+    <!-- Toast Container -->
+    <div class="toast-container-enhanced" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/enhanced-app.js"></script>
+</body>
+</html>

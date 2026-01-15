@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniRide Karachi | Smart University Carpooling</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/premium.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loader-content">
+                <div class="logo-animation">
+                    <span class="logo-icon">🚗</span>
+                    <span class="logo-text">UniRide</span>
+                </div>
+                <div class="loader-bar">
+                    <div class="loader-progress"></div>
+                </div>
+                <p class="loader-text">Finding your perfect ride...</p>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header class="glass-header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🚗</span>
+                    <span class="logo-text">UniRide</span>
+                    <span class="logo-badge">Karachi</span>
+                </div>
+                <nav class="nav-links" id="nav-links">
+                    <a href="#" class="nav-link active" data-view="home">
+                        <span class="nav-icon">🏠</span>
+                        <span>Home</span>
+                    </a>
+                    <a href="#" class="nav-link" data-view="search">
+                        <span class="nav-icon">🔍</span>
+                        <span>Find Ride</span>
+                    </a>
+                    <a href="#" class="nav-link" data-view="post" id="nav-post">
+                        <span class="nav-icon">➕</span>
+                        <span>Post Ride</span>
+                    </a>
+                    <a href="#" class="nav-link" data-view="dashboard">
+                        <span class="nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </nav>
+                <div class="header-actions">
+                    <button class="icon-btn" id="theme-toggle" title="Toggle theme">
+                        <span>🌙</span>
+                    </button>
+                    <div class="user-menu" id="user-menu">
+                        <button class="btn btn-primary" id="login-btn">Sign In</button>
+                    </div>
+                    <div class="user-profile hidden" id="user-profile">
+                        <div class="streak-badge" id="streak-badge" title="Current streak">
+                            <span class="streak-icon">🔥</span>
+                            <span class="streak-count">0</span>
+                        </div>
+                        <button class="avatar-btn" id="avatar-btn">
+                            <span class="avatar-initials">U</span>
+                        </button>
+                        <div class="dropdown-menu" id="user-dropdown">
+                            <div class="dropdown-header">
+                                <span class="user-name" id="dropdown-name">User</span>
+                                <span class="user-email" id="dropdown-email">user@uni.edu</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item" data-view="profile">
+                                <span>👤</span> Profile
+                            </a>
+                            <a href="#" class="dropdown-item" data-view="my-rides">
+                                <span>🚗</span> My Rides
+                            </a>
+                            <a href="#" class="dropdown-item" data-view="bookings">
+                                <span>📅</span> Bookings
+                            </a>
+                            <a href="#" class="dropdown-item" data-view="safety">
+                                <span>🛡️</span> Safety
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item text-danger" id="logout-btn">
+                                <span>🚪</span> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Home View - Map First -->
+            <section id="view-home" class="view active">
+                <div class="map-container" id="home-map-container">
+                    <div id="home-map" class="full-map"></div>
+                    
+                    <!-- Floating Search Card -->
+                    <div class="floating-search glass-card">
+                        <h2 class="search-title">Where are you going?</h2>
+                        <div class="quick-search">
+                            <div class="input-group">
+                                <span class="input-icon">📍</span>
+                                <input type="text" id="quick-from" placeholder="Your pickup location" class="input-field">
+                                <button class="locate-btn" id="locate-me" title="Use my location">
+                                    <span>📌</span>
+                                </button>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-icon">🎯</span>
+                                <input type="text" id="quick-to" placeholder="Your destination" class="input-field">
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group half">
+                                    <span class="input-icon">📅</span>
+                                    <input type="date" id="quick-date" class="input-field">
+                                </div>
+                                <div class="input-group half">
+                                    <span class="input-icon">⏰</span>
+                                    <input type="time" id="quick-time" class="input-field">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-lg btn-block" id="find-rides-btn">
+                                <span>🔍</span> Find Available Rides
+                            </button>
+                        </div>
+                        
+                        <!-- Popular Pickups -->
+                        <div class="popular-pickups">
+                            <h4>Popular Pickup Points</h4>
+                            <div class="pickup-chips" id="pickup-chips">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Banner -->
+                    <div class="stats-banner glass-card">
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-co2">0</span>
+                            <span class="stat-label">kg CO₂ saved</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-rides">0</span>
+                            <span class="stat-label">rides shared</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="stat-users">0</span>
+                            <span class="stat-label">students</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search Results View -->
+            <section id="view-search" class="view">
+                <div class="split-view">
+                    <div class="results-panel">
+                        <div class="results-header">
+                            <button class="back-btn" data-back="home">
+                                <span>←</span>
+                            </button>
+                            <h2>Available Rides</h2>
+                            <div class="sort-dropdown">
+                                <select id="sort-rides">
+                                    <option value="match">Best Match</option>
+                                    <option value="time">Departure Time</option>
+                                    <option value="price">Price</option>
+                                    <option value="rating">Driver Rating</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="results-summary" id="results-summary">
+                            <span class="results-count">0 rides found</span>
+                        </div>
+                        <div class="results-list" id="results-list">
+                            <!-- Skeleton loaders -->
+                            <div class="ride-card skeleton">
+                                <div class="skeleton-line w-60"></div>
+                                <div class="skeleton-line w-80"></div>
+                                <div class="skeleton-line w-40"></div>
+                            </div>
+                            <div class="ride-card skeleton">
+                                <div class="skeleton-line w-60"></div>
+                                <div class="skeleton-line w-80"></div>
+                                <div class="skeleton-line w-40"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="map-panel">
+                        <div id="search-map" class="panel-map"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ride Detail View (Bottom Sheet Style) -->
+            <div id="ride-detail-sheet" class="bottom-sheet">
+                <div class="sheet-handle"></div>
+                <div class="sheet-content">
+                    <div class="ride-detail-header">
+                        <div class="match-badge" id="detail-match-badge">
+                            <span class="match-icon">⭐</span>
+                            <span class="match-score">95%</span>
+                            <span class="match-label">Match</span>
+                        </div>
+                        <button class="close-btn" id="close-detail">✕</button>
+                    </div>
+                    
+                    <div class="ride-route-preview" id="ride-route-preview">
+                        <!-- Route animation preview -->
+                    </div>
+                    
+                    <div class="ride-info-section">
+                        <div class="route-info">
+                            <div class="route-point start">
+                                <span class="point-icon">●</span>
+                                <div class="point-details">
+                                    <span class="point-label">Pickup</span>
+                                    <span class="point-address" id="detail-source">Loading...</span>
+                                </div>
+                            </div>
+                            <div class="route-line"></div>
+                            <div class="route-point end">
+                                <span class="point-icon">◉</span>
+                                <div class="point-details">
+                                    <span class="point-label">Drop-off</span>
+                                    <span class="point-address" id="detail-destination">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ride-meta">
+                            <div class="meta-item">
+                                <span class="meta-icon">📅</span>
+                                <span class="meta-value" id="detail-date">--</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">⏰</span>
+                                <span class="meta-value" id="detail-time">--</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">💺</span>
+                                <span class="meta-value" id="detail-seats">--</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-icon">💵</span>
+                                <span class="meta-value" id="detail-price">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Driver Info -->
+                    <div class="driver-section glass-card">
+                        <div class="driver-header">
+                            <div class="driver-avatar" id="detail-driver-avatar">D</div>
+                            <div class="driver-info">
+                                <h4 id="detail-driver-name">Driver Name</h4>
+                                <p class="driver-uni" id="detail-driver-uni">University</p>
+                            </div>
+                            <div class="driver-rating">
+                                <span class="rating-stars">⭐</span>
+                                <span class="rating-value" id="detail-driver-rating">4.8</span>
+                                <span class="rating-count" id="detail-driver-rides">(50 rides)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="trust-meter">
+                            <div class="trust-label">
+                                <span>🛡️ Trust Score</span>
+                                <span class="trust-value" id="detail-trust-score">85</span>
+                            </div>
+                            <div class="trust-bar">
+                                <div class="trust-fill" id="detail-trust-fill" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="vehicle-info" id="detail-vehicle">
+                            <span class="vehicle-icon">🚗</span>
+                            <span class="vehicle-text">Honda Civic • White • ABC-123</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Carbon Impact -->
+                    <div class="carbon-preview glass-card">
+                        <h4>🌱 Environmental Impact</h4>
+                        <div class="carbon-stats">
+                            <div class="carbon-stat">
+                                <span class="carbon-value" id="detail-co2">0.8</span>
+                                <span class="carbon-label">kg CO₂ saved</span>
+                            </div>
+                            <div class="carbon-stat">
+                                <span class="carbon-value" id="detail-trees">0.1</span>
+                                <span class="carbon-label">trees equivalent</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Safety Tips -->
+                    <div class="safety-tips" id="detail-safety-tips">
+                        <h4>🛡️ Safety Tips</h4>
+                        <ul class="tips-list">
+                            <li>Share your ride details with a trusted contact</li>
+                            <li>Verify vehicle details before getting in</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Booking Actions -->
+                    <div class="booking-actions">
+                        <div class="seat-selector">
+                            <label>Seats needed:</label>
+                            <div class="seat-btns">
+                                <button class="seat-btn active" data-seats="1">1</button>
+                                <button class="seat-btn" data-seats="2">2</button>
+                                <button class="seat-btn" data-seats="3">3</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-lg btn-block" id="book-ride-btn">
+                            <span>✓</span> Book This Ride
+                        </button>
+                        <p class="booking-note">
+                            <span>🔒</span> Seats reserved for 90 seconds while you confirm
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post Ride View -->
+            <section id="view-post" class="view">
+                <div class="form-view">
+                    <div class="form-header">
+                        <h2>📤 Post a Ride</h2>
+                        <p>Share your journey with fellow students</p>
+                    </div>
+                    
+                    <form id="post-ride-form" class="premium-form">
+                        <div class="form-section">
+                            <h3>Route Details</h3>
+                            <div class="form-group">
+                                <label>Pickup Location</label>
+                                <div class="location-input">
+                                    <input type="text" id="post-source" placeholder="Enter pickup address" class="input-field" required>
+                                    <button type="button" class="map-pick-btn" data-target="source">📍 Pick on Map</button>
+                                </div>
+                                <input type="hidden" id="post-source-lat">
+                                <input type="hidden" id="post-source-lng">
+                            </div>
+                            <div class="form-group">
+                                <label>Drop-off Location</label>
+                                <div class="location-input">
+                                    <input type="text" id="post-destination" placeholder="Enter destination address" class="input-field" required>
+                                    <button type="button" class="map-pick-btn" data-target="destination">📍 Pick on Map</button>
+                                </div>
+                                <input type="hidden" id="post-destination-lat">
+                                <input type="hidden" id="post-destination-lng">
+                            </div>
+                            <div class="route-preview-mini" id="post-route-preview">
+                                <p class="preview-placeholder">Select locations to see route preview</p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3>Schedule</h3>
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>Date</label>
+                                    <input type="date" id="post-date" class="input-field" required>
+                                </div>
+                                <div class="form-group half">
+                                    <label>Time</label>
+                                    <input type="time" id="post-time" class="input-field" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3>Ride Details</h3>
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>Available Seats</label>
+                                    <select id="post-seats" class="input-field" required>
+                                        <option value="1">1 seat</option>
+                                        <option value="2">2 seats</option>
+                                        <option value="3" selected>3 seats</option>
+                                        <option value="4">4 seats</option>
+                                    </select>
+                                </div>
+                                <div class="form-group half">
+                                    <label>Fuel Split (PKR)</label>
+                                    <input type="number" id="post-price" placeholder="e.g., 200" class="input-field" min="0" max="5000">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Ride Rules (Optional)</label>
+                                <textarea id="post-rules" placeholder="e.g., No smoking, be on time..." class="input-field" rows="2"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section carbon-estimate">
+                            <div class="carbon-preview glass-card">
+                                <h4>🌱 Estimated Environmental Impact</h4>
+                                <p id="post-carbon-preview">Enter route details to see impact</p>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">
+                            <span>🚗</span> Post Ride
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Dashboard View -->
+            <section id="view-dashboard" class="view">
+                <div class="dashboard-grid">
+                    <!-- Carbon Dashboard -->
+                    <div class="dashboard-card carbon-dashboard">
+                        <div class="card-header">
+                            <h3>🌍 Your Carbon Impact</h3>
+                            <span class="card-badge eco">Eco Hero</span>
+                        </div>
+                        <div class="carbon-hero">
+                            <div class="carbon-circle">
+                                <svg viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" class="circle-bg"/>
+                                    <circle cx="50" cy="50" r="45" class="circle-progress" id="carbon-progress"/>
+                                </svg>
+                                <div class="carbon-value">
+                                    <span id="dash-co2">0</span>
+                                    <span class="carbon-unit">kg CO₂</span>
+                                </div>
+                            </div>
+                            <p class="carbon-message" id="carbon-message">Start carpooling to make an impact!</p>
+                        </div>
+                        <div class="carbon-breakdown">
+                            <div class="breakdown-item">
+                                <span class="breakdown-icon">🌳</span>
+                                <span class="breakdown-value" id="dash-trees">0</span>
+                                <span class="breakdown-label">Trees equivalent</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-icon">💰</span>
+                                <span class="breakdown-value" id="dash-savings">PKR 0</span>
+                                <span class="breakdown-label">Fuel saved</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span class="breakdown-icon">📏</span>
+                                <span class="breakdown-value" id="dash-distance">0 km</span>
+                                <span class="breakdown-label">Shared rides</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Badges & Achievements -->
+                    <div class="dashboard-card badges-card">
+                        <div class="card-header">
+                            <h3>🏆 Your Badges</h3>
+                            <a href="#" class="see-all">See all</a>
+                        </div>
+                        <div class="badges-grid" id="badges-grid">
+                            <div class="badge-item locked">
+                                <span class="badge-icon">🌱</span>
+                                <span class="badge-name">Eco Starter</span>
+                            </div>
+                            <div class="badge-item locked">
+                                <span class="badge-icon">🌍</span>
+                                <span class="badge-name">Eco Warrior</span>
+                            </div>
+                            <div class="badge-item locked">
+                                <span class="badge-icon">⭐</span>
+                                <span class="badge-name">Reliable</span>
+                            </div>
+                            <div class="badge-item locked">
+                                <span class="badge-icon">🔥</span>
+                                <span class="badge-name">Streak 7</span>
+                            </div>
+                        </div>
+                        <div class="next-milestone">
+                            <h4>Next Milestone</h4>
+                            <div class="milestone-progress">
+                                <div class="milestone-info">
+                                    <span class="milestone-icon" id="next-milestone-icon">🌱</span>
+                                    <span class="milestone-name" id="next-milestone-name">Eco Starter</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="milestone-progress" style="width: 0%"></div>
+                                </div>
+                                <span class="progress-text" id="milestone-text">0/1 rides</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Leaderboard -->
+                    <div class="dashboard-card leaderboard-card">
+                        <div class="card-header">
+                            <h3>🏅 Leaderboard</h3>
+                            <div class="leaderboard-tabs">
+                                <button class="tab-btn active" data-tab="co2">CO₂</button>
+                                <button class="tab-btn" data-tab="rides">Rides</button>
+                                <button class="tab-btn" data-tab="streak">Streak</button>
+                            </div>
+                        </div>
+                        <div class="leaderboard-list" id="leaderboard-list">
+                            <div class="leaderboard-item rank-1">
+                                <span class="rank">🥇</span>
+                                <span class="name">Loading...</span>
+                                <span class="value">--</span>
+                            </div>
+                            <div class="leaderboard-item rank-2">
+                                <span class="rank">🥈</span>
+                                <span class="name">Loading...</span>
+                                <span class="value">--</span>
+                            </div>
+                            <div class="leaderboard-item rank-3">
+                                <span class="rank">🥉</span>
+                                <span class="name">Loading...</span>
+                                <span class="value">--</span>
+                            </div>
+                        </div>
+                        <div class="your-rank">
+                            <span>Your rank: </span>
+                            <strong id="your-rank">#--</strong>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="dashboard-card activity-card">
+                        <div class="card-header">
+                            <h3>📋 Recent Activity</h3>
+                        </div>
+                        <div class="activity-list" id="activity-list">
+                            <div class="activity-item">
+                                <span class="activity-icon">🚗</span>
+                                <div class="activity-details">
+                                    <span class="activity-text">No recent activity</span>
+                                    <span class="activity-time">Start carpooling today!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- My Rides View -->
+            <section id="view-my-rides" class="view">
+                <div class="list-view">
+                    <div class="view-header">
+                        <h2>🚗 My Rides</h2>
+                        <div class="view-tabs">
+                            <button class="tab-btn active" data-status="active">Active</button>
+                            <button class="tab-btn" data-status="completed">Completed</button>
+                            <button class="tab-btn" data-status="cancelled">Cancelled</button>
+                        </div>
+                    </div>
+                    <div class="rides-list" id="my-rides-list">
+                        <div class="empty-state">
+                            <span class="empty-icon">🚗</span>
+                            <h3>No rides yet</h3>
+                            <p>Post a ride to get started</p>
+                            <button class="btn btn-primary" data-view="post">Post a Ride</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bookings View -->
+            <section id="view-bookings" class="view">
+                <div class="list-view">
+                    <div class="view-header">
+                        <h2>📅 My Bookings</h2>
+                        <div class="view-tabs">
+                            <button class="tab-btn active" data-status="upcoming">Upcoming</button>
+                            <button class="tab-btn" data-status="completed">Completed</button>
+                            <button class="tab-btn" data-status="cancelled">Cancelled</button>
+                        </div>
+                    </div>
+                    <div class="bookings-list" id="my-bookings-list">
+                        <div class="empty-state">
+                            <span class="empty-icon">📅</span>
+                            <h3>No bookings yet</h3>
+                            <p>Find a ride to get started</p>
+                            <button class="btn btn-primary" data-view="search">Find a Ride</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Safety View -->
+            <section id="view-safety" class="view">
+                <div class="safety-view">
+                    <div class="view-header">
+                        <h2>🛡️ Safety Center</h2>
+                    </div>
+                    
+                    <div class="safety-grid">
+                        <!-- Emergency Contacts -->
+                        <div class="safety-card">
+                            <div class="card-header">
+                                <h3>📞 Emergency Contacts</h3>
+                                <button class="btn btn-sm btn-secondary" id="add-contact-btn">+ Add</button>
+                            </div>
+                            <div class="contacts-list" id="emergency-contacts-list">
+                                <p class="empty-text">No emergency contacts added</p>
+                            </div>
+                            <p class="safety-note">These contacts will be notified if you trigger an SOS</p>
+                        </div>
+                        
+                        <!-- Safety Features -->
+                        <div class="safety-card">
+                            <h3>🔐 Safety Features</h3>
+                            <div class="feature-list">
+                                <div class="feature-item">
+                                    <span class="feature-icon">📍</span>
+                                    <div>
+                                        <h4>Live Ride Sharing</h4>
+                                        <p>Share your ride location with trusted contacts</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <span class="feature-icon">🆘</span>
+                                    <div>
+                                        <h4>SOS Button</h4>
+                                        <p>Quick access to emergency alert during rides</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <span class="feature-icon">✅</span>
+                                    <div>
+                                        <h4>Verified Drivers</h4>
+                                        <p>All drivers verified with university emails</p>
+                                    </div>
+                                </div>
+                                <div class="feature-item">
+                                    <span class="feature-icon">⭐</span>
+                                    <div>
+                                        <h4>Trust Scores</h4>
+                                        <p>See driver reliability before booking</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Safety Tips -->
+                        <div class="safety-card tips-card">
+                            <h3>💡 Safety Tips</h3>
+                            <div class="tips-list" id="safety-tips-list">
+                                <div class="tip-item">
+                                    <span>1</span>
+                                    <p>Always verify vehicle details before getting in</p>
+                                </div>
+                                <div class="tip-item">
+                                    <span>2</span>
+                                    <p>Share your ride details with a trusted person</p>
+                                </div>
+                                <div class="tip-item">
+                                    <span>3</span>
+                                    <p>Sit in the back seat when possible</p>
+                                </div>
+                                <div class="tip-item">
+                                    <span>4</span>
+                                    <p>Keep your phone charged during the ride</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile View -->
+            <section id="view-profile" class="view">
+                <div class="profile-view">
+                    <div class="profile-header glass-card">
+                        <div class="profile-avatar">
+                            <span id="profile-initials">U</span>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="profile-name">User Name</h2>
+                            <p id="profile-email">user@university.edu.pk</p>
+                            <p id="profile-university">University Name</p>
+                        </div>
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <span class="stat-value" id="profile-rides">0</span>
+                                <span class="stat-label">Rides</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value" id="profile-rating">--</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value" id="profile-behavior">100</span>
+                                <span class="stat-label">Trust</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-sections">
+                        <div class="profile-section">
+                            <h3>Vehicle Information</h3>
+                            <form id="vehicle-form" class="vehicle-form">
+                                <div class="form-row">
+                                    <div class="form-group half">
+                                        <label>Make</label>
+                                        <input type="text" id="vehicle-make" placeholder="e.g., Honda" class="input-field">
+                                    </div>
+                                    <div class="form-group half">
+                                        <label>Model</label>
+                                        <input type="text" id="vehicle-model" placeholder="e.g., Civic" class="input-field">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group half">
+                                        <label>Color</label>
+                                        <input type="text" id="vehicle-color" placeholder="e.g., White" class="input-field">
+                                    </div>
+                                    <div class="form-group half">
+                                        <label>Plate Number</label>
+                                        <input type="text" id="vehicle-plate" placeholder="e.g., ABC-123" class="input-field">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Vehicle Info</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Auth Modal -->
+        <div id="auth-modal" class="modal">
+            <div class="modal-content glass-card">
+                <button class="modal-close" id="close-auth-modal">✕</button>
+                
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Sign In</button>
+                    <button class="auth-tab" data-tab="register">Sign Up</button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label>University Email</label>
+                        <input type="email" id="login-email" placeholder="your.name@university.edu.pk" class="input-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" placeholder="Enter your password" class="input-field" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                </form>
+                
+                <!-- Register Form -->
+                <form id="register-form" class="auth-form hidden">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="register-name" placeholder="Your full name" class="input-field" required>
+                    </div>
+                    <div class="form-group">
+                        <label>University Email</label>
+                        <input type="email" id="register-email" placeholder="your.name@university.edu.pk" class="input-field" required>
+                        <small class="form-hint">Use your official university email</small>
+                    </div>
+                    <div class="form-group">
+                        <label>University</label>
+                        <select id="register-university" class="input-field" required>
+                            <option value="">Select your university</option>
+                            <option value="FAST-NUCES">FAST-NUCES</option>
+                            <option value="IBA">IBA Karachi</option>
+                            <option value="NED">NED University</option>
+                            <option value="KU">Karachi University</option>
+                            <option value="SZABIST">SZABIST</option>
+                            <option value="Bahria">Bahria University</option>
+                            <option value="LUMS">LUMS</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Department</label>
+                            <input type="text" id="register-department" placeholder="e.g., CS" class="input-field">
+                        </div>
+                        <div class="form-group half">
+                            <label>Role</label>
+                            <select id="register-role" class="input-field" required>
+                                <option value="rider">Rider only</option>
+                                <option value="driver">Driver only</option>
+                                <option value="both">Both</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="register-password" placeholder="Min 8 characters" class="input-field" required minlength="8">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" id="register-confirm" placeholder="Confirm password" class="input-field" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toast-container"></div>
+
+        <!-- SOS Button (visible during active ride) -->
+        <button id="sos-button" class="sos-btn hidden">
+            <span>🆘</span>
+            <span>SOS</span>
+        </button>
+    </div>
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/premium-app.js"></script>
+</body>
+</html>
